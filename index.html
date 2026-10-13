@@ -12,8 +12,8 @@
         .hidden { display: none; }
         
         /* ナビゲーションタブ */
-        .nav-tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
-        .tab-btn { background: #e0e0e0; color: #333; padding: 10px 20px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; font-size: 15px; }
+        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn { background: #e0e0e0; color: #333; padding: 10px 16px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; font-size: 14px; }
         .tab-btn.active { background: #4CAF50; color: white; }
         .tab-btn.admin-tab { background: #ff9800; color: white; }
         .tab-btn.admin-tab.active { background: #f57c00; }
@@ -40,22 +40,27 @@
         .like-btn { background: #e0e0e0; color: #333; padding: 6px 14px; font-size: 13px; border-radius: 20px; margin-top: 8px; border: none; cursor: pointer; font-weight: bold; }
         .like-btn.liked { background: #ff4081; color: white; }
 
-        /* ルールページのスタイル */
-        .rule-content { text-align: left; line-height: 1.8; color: #333; font-size: 15px; }
-        .rule-section { background: #fff; border: 1px solid #e0e0e0; border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 25px; border-radius: 6px; }
-        .rule-section h3 { color: #d32f2f; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 18px; }
-        .rule-content ul { padding-left: 25px; }
-        .rule-content li { margin-bottom: 8px; }
+        /* ルール＆FAQページのスタイル */
+        .page-content { text-align: left; line-height: 1.8; color: #333; font-size: 15px; }
+        .content-section { background: #fff; border: 1px solid #e0e0e0; border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 25px; border-radius: 6px; }
+        .content-section h3 { color: #d32f2f; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 18px; }
+        .page-content ul { padding-left: 25px; }
+        .page-content li { margin-bottom: 8px; }
         .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 15px; text-align: center; }
+
+        /* FAQアコーディオン/カードのスタイル */
+        .faq-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 15px; }
+        .faq-q { font-weight: bold; color: #1976D2; margin-bottom: 8px; font-size: 16px; }
+        .faq-a { color: #333; margin: 0; white-space: pre-wrap; }
 
         /* 内部メモのスタイル */
         .memo-content { text-align: left; }
         .memo-textarea { width: 100%; height: 350px; padding: 15px; font-size: 15px; line-height: 1.6; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; }
         
-        /* いいね確認テーブル */
-        .like-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white; }
-        .like-table th, .like-table td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
-        .like-table th { background: #f5f5f5; }
+        /* テーブル共通 */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white; }
+        .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+        .admin-table th { background: #f5f5f5; }
     </style>
 </head>
 <body>
@@ -80,6 +85,7 @@
             <button class="tab-btn active" onclick="switchTab('home')">🏠 ホーム</button>
             <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ</button>
             <button class="tab-btn" onclick="switchTab('rules')">📜 ルール</button>
+            <button class="tab-btn" onclick="switchTab('faq')">❓ FAQ</button>
             <button class="tab-btn" onclick="switchTab('memo')">📝 内部メモ</button>
             <button id="admin-tab-btn" class="tab-btn admin-tab hidden" onclick="switchTab('admin-settings')">⚙️ 管理者設定</button>
         </div>
@@ -131,11 +137,11 @@
         </div>
 
         <!-- ================= 3. ルールタブ ================= -->
-        <div id="tab-rules" class="tab-content hidden rule-content">
+        <div id="tab-rules" class="tab-content hidden page-content">
             <h2>📜 サーバー利用ルール</h2>
             
             <!-- ルール① -->
-            <div class="rule-section">
+            <div class="content-section">
                 <h3>ルール①</h3>
                 <p>Java 版マイクラをマルチプレイをする場合、VPN へ接続をしていただきます。<br>
                 セキュリティについては強く設定していますので、安心してください！<br>
@@ -151,7 +157,7 @@
             </div>
 
             <!-- ルール② -->
-            <div class="rule-section">
+            <div class="content-section">
                 <h3>ルール②</h3>
                 <p>VPN アカウントを正しく使ってほしいので注意項目を以下より確認してください。<br>
                 SoftEther VPN では基本「ユーザー名」と「PW」でアクセスすることができます。<br>
@@ -176,7 +182,7 @@
             </div>
 
             <!-- ルール③ -->
-            <div class="rule-section">
+            <div class="content-section">
                 <h3>ルール③</h3>
                 <p>VPN アカウントとポータルサイトのアカウントも付与します。<br>
                 ポータルサイトは VPN に接続しないと閲覧できないようになっています。<br>
@@ -186,7 +192,62 @@
             </div>
         </div>
 
-        <!-- ================= 4. 内部メモタブ ================= -->
+        <!-- ================= 4. FAQタブ ================= -->
+        <div id="tab-faq" class="tab-content hidden page-content">
+            <h2>❓ よくある質問 (FAQ)</h2>
+            
+            <div class="faq-item">
+                <div class="faq-q">Q. VPN アカウントを登録した PC 以外で別の PC も登録したいです。</div>
+                <p class="faq-a">A. VPN アカウントは1台の PC につき１アカウントとなります。複数登録は行っていません</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. VPN アカウントを登録していない PC からアクセスするとどうなりますか？</div>
+                <p class="faq-a">A. 不正アクセス検知となり、VPN からアクセスできません。</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. 外出先から登録した PC を VPN にアクセスしても平気ですか？</div>
+                <p class="faq-a">A. いいえ。不正アクセス検知となり、VPN からアクセスできません。</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. 自宅のネットワークが 1F と 2F で ルーター機器をルーターモードにして分けています。その場合どうしたらいいですか？</div>
+                <p class="faq-a">A. 光回線は1回線で契約者本人で使っているので、ルーターを分けて使っていても１回線の契約のためアクセスは可能です。<br>※ スマホのテザリング、ポケットWi-Fiなどで接続しないでください</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. 2世帯で暮らしていて光回線を2契約にしています。どちらかに絞らないといけないですか？</div>
+                <p class="faq-a">A. はい。2契約となるのでどちらか一つに絞っていただき、VPN 設定を行います。普段使っているメインの光回線で登録お願いします。<br>※ 誤ってもう一つの光回線に接続して VPN にアクセスをしてしまうと、不正アクセス検知となり VPN アクセスできませんので、注意してください！</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. 引っ越しをする予定で、光回線が変わります。</div>
+                <p class="faq-a">A. 引っ越しすることになって光回線が変わる場合は「うかしん」まで教えてください。 VPN のアカウントを新しく作成します！<br>※ 開通日がわかり次第、教えてください。（事業者変更も含みます）</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. 普段使っているルーターが壊れて新しいルーターを買いましたが、新しいルーターで接続しても平気ですか？</div>
+                <p class="faq-a">A. はい。問題なく接続して大丈夫です。</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. コンセント型ルーターでも可能ですか？（ Softbank Air や UQ WIMAX など）</div>
+                <p class="faq-a">A. はい。可能です。</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. マンション一体型でネット回線を利用しています。それでも平気ですか？</div>
+                <p class="faq-a">A. はい。問題なく接続できますので安心して大丈夫です。</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Q. Jcom やレオパレスの LEONET を使っています。TV へ専用のスティックを挿して Wi-Fi に接続しています。</div>
+                <p class="faq-a">A. Jcom や LEONET の TV スティック型接続でも大丈夫です。</p>
+            </div>
+        </div>
+
+        <!-- ================= 5. 内部メモタブ ================= -->
         <div id="tab-memo" class="tab-content hidden memo-content">
             <h3>📝 個人用内部メモ</h3>
             <p style="color: #666; font-size: 14px;">このメモは現在ログインしているアカウント（ブラウザ）ごとに保存されます。自分用の座標の控えや、やりたい事リストなど自由にお使いください。</p>
@@ -197,7 +258,7 @@
             </div>
         </div>
 
-        <!-- ================= 5. 管理者専用設定タブ ================= -->
+        <!-- ================= 6. 管理者専用設定タブ ================= -->
         <div id="tab-admin-settings" class="tab-content hidden" style="text-align: left;">
             <!-- テロップ編集セクション -->
             <div style="background: #fff8e1; border: 1px solid #ffe0b2; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
@@ -219,6 +280,13 @@
                 </select>
                 <button id="save-status-btn" style="background: #2196F3; margin-top: 10px;">💾 ステータスを更新する</button>
                 <span id="status-update-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
+            </div>
+
+            <!-- アカウント管理セクション -->
+            <div style="background: #f3e5f5; border: 1px solid #ce93d8; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #8e24aa; margin-top: 0;">👥 ユーザーアカウント管理（追加・変更・削除）</h3>
+                <p style="font-size: 14px; color: #555;">システムに登録されているユーザーの権限（ロール）を変更したり、Firestore上のメタデータを管理できます。</p>
+                <div id="admin-users-container">読み込み中...</div>
             </div>
 
             <!-- いいね確認セクション -->
@@ -275,6 +343,7 @@
         const saveStatusBtn = document.getElementById('save-status-btn');
         const statusUpdateStatus = document.getElementById('status-update-status');
         const adminLikesContainer = document.getElementById('admin-likes-container');
+        const adminUsersContainer = document.getElementById('admin-users-container');
 
         let currentUserIsAdmin = false;
         let vpnWatchInterval = null;
@@ -360,6 +429,7 @@
             document.getElementById('tab-home').classList.add('hidden');
             document.getElementById('tab-news').classList.add('hidden');
             document.getElementById('tab-rules').classList.add('hidden');
+            document.getElementById('tab-faq').classList.add('hidden');
             document.getElementById('tab-memo').classList.add('hidden');
             const adminSettingsTab = document.getElementById('tab-admin-settings');
             if (adminSettingsTab) adminSettingsTab.classList.add('hidden');
@@ -376,13 +446,17 @@
             } else if (tabName === 'rules') {
                 document.getElementById('tab-rules').classList.remove('hidden');
                 event.target.classList.add('active');
+            } else if (tabName === 'faq') {
+                document.getElementById('tab-faq').classList.remove('hidden');
+                event.target.classList.add('active');
             } else if (tabName === 'memo') {
                 document.getElementById('tab-memo').classList.remove('hidden');
                 event.target.classList.add('active');
             } else if (tabName === 'admin-settings') {
                 if (adminSettingsTab) adminSettingsTab.classList.remove('hidden');
                 event.target.classList.add('active');
-                loadAdminLikes(); // 管理者設定タブを開いた時にいいね一覧を読み込む
+                loadAdminLikes();
+                loadAdminUsers();
             }
         };
 
@@ -473,6 +547,66 @@
             }
         });
 
+        // ユーザー権限変更・追加・削除機能
+        window.updateUserRole = async function(uid, newRole) {
+            if (!currentUserIsAdmin) return;
+            try {
+                await updateDoc(doc(db, "users", uid), { role: newRole });
+                alert("権限を更新しました。");
+                loadAdminUsers();
+            } catch (e) {
+                alert("更新失敗: " + e.message);
+            }
+        };
+
+        window.deleteUserRecord = async function(uid) {
+            if (!currentUserIsAdmin) return;
+            if (confirm("本当にこのユーザーの管理者/権限データを削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "users", uid));
+                    alert("ユーザーデータを削除しました。");
+                    loadAdminUsers();
+                } catch (e) {
+                    alert("削除失敗: " + e.message);
+                }
+            }
+        };
+
+        async function loadAdminUsers() {
+            if (!currentUserIsAdmin) return;
+            adminUsersContainer.innerHTML = "読み込み中...";
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                if (querySnapshot.empty) {
+                    adminUsersContainer.innerHTML = "<p>登録されているユーザー情報がありません。</p>";
+                    return;
+                }
+
+                let html = `<table class="admin-table"><tr><th>ユーザー UID / 識別子</th><th>権限 (Role)</th><th>操作</th></tr>`;
+                querySnapshot.forEach((docSnap) => {
+                    const uid = docSnap.id;
+                    const data = docSnap.data();
+                    const role = data.role || 'user';
+
+                    html += `<tr>
+                        <td><code>${uid}</code></td>
+                        <td>
+                            <select onchange="updateUserRole('${uid}', this.value)">
+                                <option value="user" ${role === 'user' ? 'selected' : ''}>一般 (user)</option>
+                                <option value="admin" ${role === 'admin' ? 'selected' : ''}>管理者 (admin)</option>
+                            </select>
+                        </td>
+                        <td><button class="delete-btn" style="padding: 4px 8px; font-size: 11px;" onclick="deleteUserRecord('${uid}')">削除</button></td>
+                    </tr>`;
+                });
+                html += `</table><p style="font-size: 12px; color: #666; margin-top: 8px;">※ 新規アカウントはFirebase Console等で作成後、UIDがここに紐づきます。</p>`;
+                adminUsersContainer.innerHTML = html;
+            } catch (e) {
+                console.error("ユーザー一覧読み込みエラー: ", e);
+                adminUsersContainer.innerHTML = "<p>ユーザー情報の読み込みに失敗しました。</p>";
+            }
+        }
+
         function parseLinks(text) {
             if (!text) return "";
             const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
@@ -514,7 +648,6 @@
             }
         };
 
-        // いいねボタンのトグル処理
         window.toggleLike = async function(docId) {
             const user = auth.currentUser;
             if (!user) return;
@@ -529,15 +662,9 @@
 
             try {
                 if (likes.includes(userEmail)) {
-                    // すでにいいねしていれば削除（解除）
-                    await updateDoc(postRef, {
-                        likes: arrayRemove(userEmail)
-                    });
+                    await updateDoc(postRef, { likes: arrayRemove(userEmail) });
                 } else {
-                    // いいね追加
-                    await updateDoc(postRef, {
-                        likes: arrayUnion(userEmail)
-                    });
+                    await updateDoc(postRef, { likes: arrayUnion(userEmail) });
                 }
                 loadPosts();
             } catch (e) {
@@ -545,7 +672,6 @@
             }
         };
 
-        // 管理者画面の「いいね確認リーダー」表示用関数
         async function loadAdminLikes() {
             if (!currentUserIsAdmin) return;
             adminLikesContainer.innerHTML = "読み込み中...";
@@ -558,7 +684,7 @@
                     return;
                 }
 
-                let html = `<table class="like-table"><tr><th>お知らせタイトル</th><th>いいね数</th><th>いいねしたユーザー (メールアドレス)</th></tr>`;
+                let html = `<table class="admin-table"><tr><th>お知らせタイトル</th><th>いいね数</th><th>いいねしたユーザー (メールアドレス)</th></tr>`;
                 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
@@ -656,7 +782,7 @@
                     content: content,
                     author: auth.currentUser.email,
                     createdAt: new Date(),
-                    likes: [] // 初期いいね配列
+                    likes: []
                 });
                 alert('お知らせを投稿しました！');
                 document.getElementById('post-title').value = '';

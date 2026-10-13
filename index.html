@@ -49,9 +49,9 @@
         .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 15px; text-align: center; }
 
         /* FAQアコーディオン/カードのスタイル */
-        .faq-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 15px; }
+        .faq-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 15px; text-align: left; }
         .faq-q { font-weight: bold; color: #1976D2; margin-bottom: 8px; font-size: 16px; }
-        .faq-a { color: #333; margin: 0; white-space: pre-wrap; }
+        .faq-a { color: #333; margin: 0; white-space: pre-wrap; line-height: 1.6; }
 
         /* 内部メモのスタイル */
         .memo-content { text-align: left; }
@@ -195,56 +195,7 @@
         <!-- ================= 4. FAQタブ ================= -->
         <div id="tab-faq" class="tab-content hidden page-content">
             <h2>❓ よくある質問 (FAQ)</h2>
-            
-            <div class="faq-item">
-                <div class="faq-q">Q. VPN アカウントを登録した PC 以外で別の PC も登録したいです。</div>
-                <p class="faq-a">A. VPN アカウントは1台の PC につき１アカウントとなります。複数登録は行っていません</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. VPN アカウントを登録していない PC からアクセスするとどうなりますか？</div>
-                <p class="faq-a">A. 不正アクセス検知となり、VPN からアクセスできません。</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. 外出先から登録した PC を VPN にアクセスしても平気ですか？</div>
-                <p class="faq-a">A. いいえ。不正アクセス検知となり、VPN からアクセスできません。</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. 自宅のネットワークが 1F と 2F で ルーター機器をルーターモードにして分けています。その場合どうしたらいいですか？</div>
-                <p class="faq-a">A. 光回線は1回線で契約者本人で使っているので、ルーターを分けて使っていても１回線の契約のためアクセスは可能です。<br>※ スマホのテザリング、ポケットWi-Fiなどで接続しないでください</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. 2世帯で暮らしていて光回線を2契約にしています。どちらかに絞らないといけないですか？</div>
-                <p class="faq-a">A. はい。2契約となるのでどちらか一つに絞っていただき、VPN 設定を行います。普段使っているメインの光回線で登録お願いします。<br>※ 誤ってもう一つの光回線に接続して VPN にアクセスをしてしまうと、不正アクセス検知となり VPN アクセスできませんので、注意してください！</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. 引っ越しをする予定で、光回線が変わります。</div>
-                <p class="faq-a">A. 引っ越しすることになって光回線が変わる場合は「うかしん」まで教えてください。 VPN のアカウントを新しく作成します！<br>※ 開通日がわかり次第、教えてください。（事業者変更も含みます）</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. 普段使っているルーターが壊れて新しいルーターを買いましたが、新しいルーターで接続しても平気ですか？</div>
-                <p class="faq-a">A. はい。問題なく接続して大丈夫です。</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. コンセント型ルーターでも可能ですか？（ Softbank Air や UQ WIMAX など）</div>
-                <p class="faq-a">A. はい。可能です。</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. マンション一体型でネット回線を利用しています。それでも平気ですか？</div>
-                <p class="faq-a">A. はい。問題なく接続できますので安心して大丈夫です。</p>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-q">Q. Jcom やレオパレスの LEONET を使っています。TV へ専用のスティックを挿して Wi-Fi に接続しています。</div>
-                <p class="faq-a">A. Jcom や LEONET の TV スティック型接続でも大丈夫です。</p>
-            </div>
+            <div id="faq-list-container">読み込み中...</div>
         </div>
 
         <!-- ================= 5. 内部メモタブ ================= -->
@@ -260,6 +211,16 @@
 
         <!-- ================= 6. 管理者専用設定タブ ================= -->
         <div id="tab-admin-settings" class="tab-content hidden" style="text-align: left;">
+            <!-- FAQ追加・管理セクション -->
+            <div style="background: #e8f5e9; border: 1px solid #c8e6c9; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #2e7d32; margin-top: 0;">❓ FAQ（よくある質問）の追加・管理</h3>
+                <p style="font-size: 14px; color: #555;">「FAQ」タブに表示される質問と回答をブラウザ上から追加できます。</p>
+                <input type="text" id="faq-q-input" placeholder="質問文（例: Q. 〜〜〜ですか？）">
+                <textarea id="faq-a-input" placeholder="回答文（例: A. 〜〜〜です。）" rows="3"></textarea>
+                <button id="add-faq-btn" style="background: #4CAF50;">➕ 新しいFAQを追加する</button>
+                <div id="admin-faq-list" style="margin-top: 15px;"></div>
+            </div>
+
             <!-- テロップ編集セクション -->
             <div style="background: #fff8e1; border: 1px solid #ffe0b2; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
                 <h3 style="color: #f57c00; margin-top: 0;">⚙️ ニューステロップ編集</h3>
@@ -344,6 +305,11 @@
         const statusUpdateStatus = document.getElementById('status-update-status');
         const adminLikesContainer = document.getElementById('admin-likes-container');
         const adminUsersContainer = document.getElementById('admin-users-container');
+        const faqListContainer = document.getElementById('faq-list-container');
+        const faqQInput = document.getElementById('faq-q-input');
+        const faqAInput = document.getElementById('faq-a-input');
+        const addFaqBtn = document.getElementById('add-faq-btn');
+        const adminFaqList = document.getElementById('admin-faq-list');
 
         let currentUserIsAdmin = false;
         let vpnWatchInterval = null;
@@ -449,6 +415,7 @@
             } else if (tabName === 'faq') {
                 document.getElementById('tab-faq').classList.remove('hidden');
                 event.target.classList.add('active');
+                loadFaqs();
             } else if (tabName === 'memo') {
                 document.getElementById('tab-memo').classList.remove('hidden');
                 event.target.classList.add('active');
@@ -457,6 +424,7 @@
                 event.target.classList.add('active');
                 loadAdminLikes();
                 loadAdminUsers();
+                loadAdminFaqs();
             }
         };
 
@@ -547,7 +515,112 @@
             }
         });
 
-        // ユーザー権限変更・追加・削除機能
+        // ================= FAQ追加・読み込み・削除のロジック =================
+        addFaqBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const question = faqQInput.value.trim();
+            const answer = faqAInput.value.trim();
+
+            if (!question || !answer) {
+                alert("質問と回答の両方を入力してください。");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "faqs"), {
+                    question: question,
+                    answer: answer,
+                    createdAt: new Date()
+                });
+                alert("FAQを追加しました！");
+                faqQInput.value = "";
+                faqAInput.value = "";
+                loadAdminFaqs();
+                loadFaqs();
+            } catch (e) {
+                alert("FAQ追加エラー: " + e.message);
+            }
+        });
+
+        window.deleteFaq = async function(docId) {
+            if (!currentUserIsAdmin) return;
+            if (confirm("このFAQ項目を削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "faqs", docId));
+                    alert("FAQを削除しました。");
+                    loadAdminFaqs();
+                    loadFaqs();
+                } catch (e) {
+                    alert("削除エラー: " + e.message);
+                }
+            }
+        };
+
+        // 一般公開用FAQの読み込み
+        async function loadFaqs() {
+            faqListContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "faqs"), orderBy("createdAt", "asc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // デフォルトの基本FAQ項目（データがない場合に初期表示）
+                    faqListContainer.innerHTML = `
+                        <div class="faq-item"><div class="faq-q">Q. VPN アカウントを登録した PC 以外で別の PC も登録したいです。</div><p class="faq-a">A. VPN アカウントは1台の PC につき１アカウントとなります。複数登録は行っていません</p></div>
+                        <div class="faq-item"><div class="faq-q">Q. VPN アカウントを登録していない PC からアクセスするとどうなりますか？</div><p class="faq-a">A. 不正アクセス検知となり、VPN からアクセスできません。</p></div>
+                        <div class="faq-item"><div class="faq-q">Q. 外出先から登録した PC を VPN にアクセスしても平気ですか？</div><p class="faq-a">A. いいえ。不正アクセス検知となり、VPN からアクセスできません。</p></div>
+                    `;
+                    return;
+                }
+
+                let html = "";
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    html += `
+                        <div class="faq-item">
+                            <div class="faq-q">${escapeHtml(data.question)}</div>
+                            <p class="faq-a">${escapeHtml(data.answer)}</p>
+                        </div>
+                    `;
+                });
+                faqListContainer.innerHTML = html;
+            } catch (e) {
+                console.error("FAQ読み込みエラー: ", e);
+                faqListContainer.innerHTML = "<p>FAQの読み込みに失敗しました。</p>";
+            }
+        }
+
+        // 管理者画面用のFAQ一覧読み込み
+        async function loadAdminFaqs() {
+            if (!currentUserIsAdmin) return;
+            adminFaqList.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "faqs"), orderBy("createdAt", "asc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    adminFaqList.innerHTML = "<p style='font-size: 13px; color: #666;'>追加されたカスタマイズFAQはありません。</p>";
+                    return;
+                }
+
+                let html = `<table class="admin-table"><tr><th>質問 (Question)</th><th>回答 (Answer)</th><th>操作</th></tr>`;
+                querySnapshot.forEach((docSnap) => {
+                    const docId = docSnap.id;
+                    const data = docSnap.data();
+                    html += `<tr>
+                        <td><strong>${escapeHtml(data.question)}</strong></td>
+                        <td>${escapeHtml(data.answer)}</td>
+                        <td><button class="delete-btn" style="padding: 4px 8px; font-size: 11px;" onclick="deleteFaq('${docId}')">削除</button></td>
+                    </tr>`;
+                });
+                html += `</table>`;
+                adminFaqList.innerHTML = html;
+            } catch (e) {
+                console.error("管理者FAQ読み込みエラー: ", e);
+                adminFaqList.innerHTML = "<p>読み込み失敗</p>";
+            }
+        }
+
         window.updateUserRole = async function(uid, newRole) {
             if (!currentUserIsAdmin) return;
             try {
@@ -818,6 +891,7 @@
 
                 loadPosts();
                 loadSettings();
+                loadFaqs();
                 startVpnWatchdog();
                 resetIdleTimer();
             } else {

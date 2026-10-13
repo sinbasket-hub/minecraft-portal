@@ -5,7 +5,6 @@
     <title>マイクラチーム ポータル</title>
     <style>
         body { font-family: sans-serif; text-align: center; margin: 0; background: #f4f4f9; padding-top: 30px; }
-        /* 全体のボックスを広めに変更 (max-width: 900px) */
         .box { background: white; max-width: 900px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         input, textarea { display: block; width: 95%; margin: 10px auto; padding: 12px; font-family: sans-serif; font-size: 14px; box-sizing: border-box; }
         button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
@@ -34,6 +33,10 @@
         .rule-content ul { padding-left: 25px; }
         .rule-content li { margin-bottom: 8px; }
         .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 15px; text-align: center; }
+
+        /* 内部メモのスタイル */
+        .memo-content { text-align: left; }
+        .memo-textarea { width: 100%; height: 350px; padding: 15px; font-size: 15px; line-height: 1.6; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -58,6 +61,7 @@
             <button class="tab-btn active" onclick="switchTab('home')">🏠 ホーム</button>
             <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ</button>
             <button class="tab-btn" onclick="switchTab('rules')">📜 ルール</button>
+            <button class="tab-btn" onclick="switchTab('memo')">📝 内部メモ</button>
         </div>
 
         <!-- ================= 1. ホームタブ（ダッシュボード） ================= -->
@@ -148,6 +152,17 @@
                 その都度、お知らせへ投稿していくので確認お願いします！</p>
             </div>
         </div>
+
+        <!-- ================= 4. 内部メモタブ ================= -->
+        <div id="tab-memo" class="tab-content hidden memo-content">
+            <h3>📝 個人用内部メモ</h3>
+            <p style="color: #666; font-size: 14px;">このメモは現在ログインしているアカウント（ブラウザ）ごとに保存されます。自分用の座標の控えや、やりたい事リストなど自由にお使いください。</p>
+            <textarea id="user-memo-area" class="memo-textarea" placeholder="ここに自由なメモを入力してください（自動で保存されます）..."></textarea>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <button id="save-memo-btn" style="background: #2196F3;">💾 メモを保存する</button>
+                <span id="memo-status" style="color: #4CAF50; font-weight: bold; font-size: 14px;"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Firebaseのスクリプト読み込みと処理 -->
@@ -179,14 +194,19 @@
         const postBtn = document.getElementById('post-btn');
         const homePostsContainer = document.getElementById('home-posts-container');
         const newsPostsContainer = document.getElementById('news-posts-container');
+        const userMemoArea = document.getElementById('user-memo-area');
+        const saveMemoBtn = document.getElementById('save-memo-btn');
+        const memoStatus = document.getElementById('memo-status');
 
         let currentUserIsAdmin = false;
+        let currentUserId = null;
 
         // タブ切り替え関数をグローバルに公開
         window.switchTab = function(tabName) {
             document.getElementById('tab-home').classList.add('hidden');
             document.getElementById('tab-news').classList.add('hidden');
             document.getElementById('tab-rules').classList.add('hidden');
+            document.getElementById('tab-memo').classList.add('hidden');
             
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
@@ -199,6 +219,9 @@
                 event.target.classList.add('active');
             } else if (tabName === 'rules') {
                 document.getElementById('tab-rules').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'memo') {
+                document.getElementById('tab-memo').classList.remove('hidden');
                 event.target.classList.add('active');
             }
         };
@@ -216,6 +239,18 @@
         // ログアウト処理
         logoutBtn.addEventListener('click', () => {
             signOut(auth);
+        });
+
+        // メモの保存処理
+        saveMemoBtn.addEventListener('click', () => {
+            if (!currentUserId) return;
+            const memoText = userMemoArea.value;
+            // ユーザーごとの固有キーでブラウザに保存
+            localStorage.setItem(`minecraft_portal_memo_${currentUserId}`, memoText);
+            memoStatus.innerText = "✓ 保存しました！";
+            setTimeout(() => {
+                memoStatus.innerText = "";
+            }, 3000);
         });
 
         // リンク解析関数
@@ -346,6 +381,12 @@
                 loginSection.classList.add('hidden');
                 portalSection.classList.remove('hidden');
                 welcomeMsg.innerText = `${user.email} さん、こんにちは！`;
+                
+                currentUserId = user.uid;
+
+                // ログインしたユーザーのUIDに紐づくメモを読み込む
+                const savedMemo = localStorage.getItem(`minecraft_portal_memo_${currentUserId}`);
+                userMemoArea.value = savedMemo ? savedMemo : "";
 
                 const userDocRef = doc(db, "users", user.uid);
                 const userDoc = await getDoc(userDocRef);
@@ -364,6 +405,8 @@
                 portalSection.classList.add('hidden');
                 adminArea.classList.add('hidden');
                 currentUserIsAdmin = false;
+                currentUserId = null;
+                userMemoArea.value = "";
             }
         });
     </script>

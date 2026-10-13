@@ -139,6 +139,7 @@
                 <p id="live-clock" style="font-size: 18px; font-weight: bold; margin: 0; color: #333;">読み込み中...</p>
             </div>
 
+            <!-- サーバー情報カード -->
             <div class="card">
                 <h3>🌍 マイクラサーバー情報</h3>
                 <p><strong>ステータス:</strong> <span id="server-status-display" style="font-weight: bold; color: green;">● オンライン</span></p>
@@ -147,6 +148,15 @@
                     <div id="server-ip-text" class="server-ip">minecraft.example.com</div>
                     <button class="copy-btn" id="copy-ip-btn">📋 IPをコピー</button>
                 </div>
+            </div>
+
+            <!-- 動画配置カード -->
+            <div class="card" style="border-left-color: #ff9800; background: #fff8e1; text-align: center;">
+                <h3 style="margin-top: 0; color: #e65100;">🎬 チュートリアル動画</h3>
+                <video controls style="width: 100%; max-height: 400px; border-radius: 4px; background: #000;">
+                    <source src="sample.mp4" type="video/mp4">
+                    お使いのブラウザは動画タグをサポートしていません。
+                </video>
             </div>
 
             <div style="text-align: left; margin-top: 25px;">
@@ -605,7 +615,6 @@
             }
         });
 
-        // サーバーIPアドレス更新処理
         saveServerIpBtn.addEventListener('click', async () => {
             if (!currentUserIsAdmin) return;
             const newIp = serverIpInput.value.trim();
@@ -664,7 +673,6 @@
             }
         };
 
-        // 一般公開用FAQの読み込み
         async function loadFaqs() {
             faqListContainer.innerHTML = "読み込み中...";
             try {
@@ -693,7 +701,6 @@
             }
         }
 
-        // 管理者画面用のFAQ一覧読み込み
         async function loadAdminFaqs() {
             if (!currentUserIsAdmin) return;
             adminFaqList.innerHTML = "読み込み中...";

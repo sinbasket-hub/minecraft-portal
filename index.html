@@ -66,6 +66,12 @@
 
         <!-- ================= 1. ホームタブ（ダッシュボード） ================= -->
         <div id="tab-home" class="tab-content">
+            <!-- 日時表示カード -->
+            <div class="card" style="border-left-color: #4CAF50; background: #f1f8e9;">
+                <h3 style="margin-top: 0; color: #2e7d32;">🕒 現在の日時</h3>
+                <p id="live-clock" style="font-size: 18px; font-weight: bold; margin: 0; color: #333;">読み込み中...</p>
+            </div>
+
             <div class="card">
                 <h3>🌍 マイクラサーバー情報</h3>
                 <p><strong>ステータス:</strong> <span style="color: green; font-weight: bold;">● オンライン</span></p>
@@ -197,9 +203,30 @@
         const userMemoArea = document.getElementById('user-memo-area');
         const saveMemoBtn = document.getElementById('save-memo-btn');
         const memoStatus = document.getElementById('memo-status');
+        const liveClock = document.getElementById('live-clock');
 
         let currentUserIsAdmin = false;
         let currentUserId = null;
+
+        // リアルタイム時計の更新関数
+        function updateClock() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                weekday: 'short', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false 
+            };
+            if (liveClock) {
+                liveClock.innerText = now.toLocaleDateString('ja-JP', options);
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); // 即時実行
 
         // タブ切り替え関数をグローバルに公開
         window.switchTab = function(tabName) {
@@ -245,7 +272,6 @@
         saveMemoBtn.addEventListener('click', () => {
             if (!currentUserId) return;
             const memoText = userMemoArea.value;
-            // ユーザーごとの固有キーでブラウザに保存
             localStorage.setItem(`minecraft_portal_memo_${currentUserId}`, memoText);
             memoStatus.innerText = "✓ 保存しました！";
             setTimeout(() => {
@@ -384,7 +410,6 @@
                 
                 currentUserId = user.uid;
 
-                // ログインしたユーザーのUIDに紐づくメモを読み込む
                 const savedMemo = localStorage.getItem(`minecraft_portal_memo_${currentUserId}`);
                 userMemoArea.value = savedMemo ? savedMemo : "";
 

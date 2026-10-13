@@ -4,13 +4,25 @@
     <meta charset="UTF-8">
     <title>マイクラチーム ポータル</title>
     <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 50px; background: #f4f4f9; }
-        .box { background: white; max-width: 500px; margin: 0 auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: sans-serif; text-align: center; margin: 0; background: #f4f4f9; padding-top: 30px; }
+        .box { background: white; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input, textarea { display: block; width: 90%; margin: 10px auto; padding: 10px; font-family: sans-serif; }
         button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { opacity: 0.9; }
         .hidden { display: none; }
-        .admin-box { background: #ffffe0; padding: 10px; margin-top: 15px; border-radius: 6px; text-align: left; }
-        .post-item { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
+        
+        /* ナビゲーションタブ */
+        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: #e0e0e0; color: #333; padding: 8px 16px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
+        .tab-btn.active { background: #4CAF50; color: white; }
+
+        /* ダッシュボードカード */
+        .card { background: #eef9ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; text-align: left; border-radius: 4px; }
+        .server-ip { background: #333; color: #4CAF50; padding: 8px 12px; font-family: monospace; font-size: 16px; border-radius: 4px; display: inline-block; user-select: all; }
+        
+        /* 管理・投稿エリア */
+        .admin-box { background: #ffffe0; padding: 15px; margin-top: 15px; border-radius: 6px; text-align: left; border: 1px dashed #ffd700; }
+        .post-item { background: white; padding: 12px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
         .post-item a { color: #1e88e5; text-decoration: underline; font-weight: bold; }
         .delete-btn { background: #f44336; padding: 4px 10px; font-size: 12px; margin-top: 8px; }
     </style>
@@ -25,25 +37,59 @@
         <button id="login-btn">ログイン</button>
     </div>
 
-    <!-- ログイン後画面 -->
-    <div id="portal-section" class="box hidden">
-        <h1 id="welcome-msg">ようこそ！</h1>
-        
-        <!-- 管理者メニュー（お知らせ投稿フォーム） -->
-        <div id="admin-area" class="hidden admin-box">
-            <h3>[管理者メニュー] お知らせ投稿</h3>
-            <input type="text" id="post-title" placeholder="お知らせのタイトル">
-            <textarea id="post-content" placeholder="例: [ファイル共有](https://...) のように書けます" rows="3"></textarea>
-            <button id="post-btn">投稿する</button>
+    <!-- ログイン後メインポータル画面 -->
+    <div id="portal-section" class="box hidden" style="max-width: 650px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px;">
+            <h2 id="welcome-msg" style="margin: 0; font-size: 18px;">ようこそ！</h2>
+            <button id="logout-btn" style="background: #f44336; padding: 6px 12px; font-size: 14px;">ログアウト</button>
         </div>
 
-        <!-- お知らせ一覧エリア -->
-        <div style="margin-top: 20px; text-align: left;">
-            <h3>📢 チームお知らせ一覧</h3>
-            <div id="posts-container">読み込み中...</div>
+        <!-- 画面切り替えタブ -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('home')">🏠 ホーム</button>
+            <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ掲示板</button>
         </div>
 
-        <button id="logout-btn" style="background: #f44336; margin-top: 20px;">ログアウト</button>
+        <!-- ================= 1. ホームタブ（ダッシュボード） ================= -->
+        <div id="tab-home" class="tab-content">
+            <div class="card">
+                <h3>🌍 マイクラサーバー情報</h3>
+                <p><strong>ステータス:</strong> <span style="color: green; font-weight: bold;">● オンライン</span></p>
+                <p><strong>サーバーアドレス (IP):</strong></p>
+                <div class="server-ip">minecraft.example.com</div>
+                <p style="font-size: 13px; color: #666; margin-top: 8px;">Java版 / 統合版対応 (Ver 1.20.4)</p>
+            </div>
+
+            <div class="card" style="border-left-color: #ff9800; background: #fffaf0;">
+                <h3>🔗 クイックリンク</h3>
+                <p>ポータル管理や共有スペースへのショートカットです。</p>
+                <div style="margin-top: 10px;">
+                    <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #2196F3; color: white; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-right: 5px;">📁 Googleドライブを開く</a>
+                </div>
+            </div>
+
+            <div style="text-align: left; margin-top: 20px;">
+                <h3>📌 最新のお知らせ（抜粋）</h3>
+                <div id="home-posts-container">読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- ================= 2. お知らせ掲示板タブ ================= -->
+        <div id="tab-news" class="tab-content hidden">
+            <!-- 管理者メニュー（お知らせ投稿フォーム） -->
+            <div id="admin-area" class="hidden admin-box">
+                <h3>[管理者メニュー] お知らせ投稿</h3>
+                <input type="text" id="post-title" placeholder="お知らせのタイトル">
+                <textarea id="post-content" placeholder="例: [ファイル共有](https://...) のように書けます" rows="3"></textarea>
+                <button id="post-btn">投稿する</button>
+            </div>
+
+            <!-- お知らせ一覧エリア -->
+            <div style="margin-top: 20px; text-align: left;">
+                <h3>📢 チームお知らせ一覧</h3>
+                <div id="news-posts-container">読み込み中...</div>
+            </div>
+        </div>
     </div>
 
     <!-- Firebaseのスクリプト読み込みと処理 -->
@@ -73,9 +119,27 @@
         const adminArea = document.getElementById('admin-area');
         const welcomeMsg = document.getElementById('welcome-msg');
         const postBtn = document.getElementById('post-btn');
-        const postsContainer = document.getElementById('posts-container');
+        const homePostsContainer = document.getElementById('home-posts-container');
+        const newsPostsContainer = document.getElementById('news-posts-container');
 
         let currentUserIsAdmin = false;
+
+        // タブ切り替え関数をグローバルに公開
+        window.switchTab = function(tabName) {
+            document.getElementById('tab-home').classList.add('hidden');
+            document.getElementById('tab-news').classList.add('hidden');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            if (tabName === 'home') {
+                document.getElementById('tab-home').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'news') {
+                document.getElementById('tab-news').classList.remove('hidden');
+                event.target.classList.add('active');
+            }
+        };
 
         // ログイン処理
         loginBtn.addEventListener('click', () => {
@@ -92,30 +156,21 @@
             signOut(auth);
         });
 
-        // リンクとセキュリティを完全に両立させる変換関数
+        // リンク解析関数（文字埋め込み＆通常URL両対応）
         function parseLinks(text) {
             if (!text) return "";
-
-            // 1. [表示名](URL) を先に抽出して、安全なHTMLタグに置換する
-            // （エスケープされる前に処理することで記号の崩れを防ぎます）
             const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
-            
-            // 一時的にプレースホルダーに置き換えるか、直接安全な<a>タグにする
             let processed = text.replace(markdownLinkRegex, function(match, label, url) {
                 const safeLabel = escapeHtml(label);
                 const safeUrl = escapeHtml(url);
                 return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeLabel}</a>`;
             });
 
-            // 2. 残りの通常テキスト部分に対してHTMLエスケープを適用する
-            // （ただし、先ほど作った <a> タグ部分は壊さないように分割して処理）
             let parts = processed.split(/(<a href="[^"]+" target="_blank" rel="noopener noreferrer">.*?<\/a>)/g);
-            
             parts = parts.map(part => {
                 if (part.startsWith('<a href=')) {
-                    return part; // すでにリンク化した部分はそのまま
+                    return part;
                 } else {
-                    // 通常テキストはエスケープしつつ、むき出しのURLがあれば自動リンク化
                     let escaped = escapeHtml(part);
                     const urlRegex = /(https?:\/\/[^\s<]+)/g;
                     return escaped.replace(urlRegex, function(url) {
@@ -124,7 +179,6 @@
                     });
                 }
             });
-
             return parts.join('');
         }
 
@@ -146,19 +200,24 @@
             }
         };
 
-        // お知らせをFirestoreから取得して表示する関数
+        // お知らせをFirestoreから取得してホームと掲示板の両方に表示する関数
         async function loadPosts() {
-            postsContainer.innerHTML = "読み込み中...";
+            homePostsContainer.innerHTML = "読み込み中...";
+            newsPostsContainer.innerHTML = "読み込み中...";
             try {
                 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    postsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
+                    homePostsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
+                    newsPostsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
                     return;
                 }
 
-                let html = "";
+                let newsHtml = "";
+                let homeHtml = "";
+                let count = 0;
+
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const docId = docSnap.id;
@@ -168,7 +227,7 @@
                         deleteButtonHtml = `<button class="delete-btn" onclick="deletePost('${docId}')">削除</button>`;
                     }
 
-                    html += `
+                    const itemHtml = `
                         <div class="post-item">
                             <h4 style="margin: 0 0 5px 0;">${escapeHtml(data.title)}</h4>
                             <p style="margin: 0; white-space: pre-wrap;">${parseLinks(data.content)}</p>
@@ -176,11 +235,21 @@
                             <div>${deleteButtonHtml}</div>
                         </div>
                     `;
+
+                    newsHtml += itemHtml;
+                    // ホーム画面には最新の3件だけを表示する
+                    if (count < 3) {
+                        homeHtml += itemHtml;
+                        count++;
+                    }
                 });
-                postsContainer.innerHTML = html;
+
+                newsPostsContainer.innerHTML = newsHtml;
+                homePostsContainer.innerHTML = homeHtml;
             } catch (e) {
                 console.error("お知らせ読み込みエラー: ", e);
-                postsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
+                homePostsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
+                newsPostsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
             }
         }
 

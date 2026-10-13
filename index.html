@@ -388,17 +388,52 @@
             }, 4000);
         }
 
+        // 確実なIPアドレスコピー機能（フォールバック対応）
         copyIpBtn.addEventListener('click', () => {
             const ipText = serverIpText.innerText;
-            navigator.clipboard.writeText(ipText).then(() => {
-                copyIpBtn.innerText = "✓ コピー完了！";
-                copyIpBtn.style.background = "#4CAF50";
-                setTimeout(() => {
-                    copyIpBtn.innerText = "📋 IPをコピー";
-                    copyIpBtn.style.background = "#2196F3";
-                }, 2000);
-            });
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(ipText).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopyText(ipText);
+                });
+            } else {
+                fallbackCopyText(ipText);
+            }
         });
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";  // 画面外に隠す
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                } else {
+                    alert("コピーに失敗しました。手動でコピーしてください。");
+                }
+            } catch (err) {
+                alert("コピーエラー: " + err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess() {
+            copyIpBtn.innerText = "✓ コピー完了！";
+            copyIpBtn.style.background = "#4CAF50";
+            setTimeout(() => {
+                copyIpBtn.innerText = "📋 IPをコピー";
+                copyIpBtn.style.background = "#2196F3";
+            }, 2000);
+        }
 
         function updateGreeting(email) {
             if (!email) return;

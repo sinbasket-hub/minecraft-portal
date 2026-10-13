@@ -10,7 +10,8 @@
         button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
         .hidden { display: none; }
         .admin-box { background: #ffffe0; padding: 10px; margin-top: 15px; border-radius: 6px; text-align: left; }
-        .post-item { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .post-item { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
+        .post-item a { color: #1e88e5; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -31,7 +32,7 @@
         <div id="admin-area" class="hidden admin-box">
             <h3>[管理者メニュー] お知らせ投稿</h3>
             <input type="text" id="post-title" placeholder="お知らせのタイトル">
-            <textarea id="post-content" placeholder="お知らせの内容" rows="3"></textarea>
+            <textarea id="post-content" placeholder="お知らせの内容（URLを入れると自動でリンクになります）" rows="3"></textarea>
             <button id="post-btn">投稿する</button>
         </div>
 
@@ -88,6 +89,21 @@
             signOut(auth);
         });
 
+        // テキスト内のURLを自動でリンク（<a>タグ）に変換する関数
+        function linkify(text) {
+            const safeText = escapeHtml(text);
+            // http:// または https:// で始まる文字列を自動でリンク化する正規表現
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return safeText.replace(urlRegex, function(url) {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+            });
+        }
+
+        // HTMLエスケープ用関数（セキュリティ対策）
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
         // お知らせをFirestoreから取得して表示する関数
         async function loadPosts() {
             postsContainer.innerHTML = "読み込み中...";
@@ -106,7 +122,7 @@
                     html += `
                         <div class="post-item">
                             <h4 style="margin: 0 0 5px 0;">${escapeHtml(data.title)}</h4>
-                            <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(data.content)}</p>
+                            <p style="margin: 0; white-space: pre-wrap;">${linkify(data.content)}</p>
                             <small style="color: gray;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
                         </div>
                     `;
@@ -116,11 +132,6 @@
                 console.error("お知らせ読み込みエラー: ", e);
                 postsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
             }
-        }
-
-        // HTMLエスケープ用関数（セキュリティ対策）
-        function escapeHtml(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
         // お知らせ投稿処理

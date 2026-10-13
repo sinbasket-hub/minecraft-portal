@@ -6,7 +6,7 @@
     <style>
         body { font-family: sans-serif; text-align: center; margin: 0; background: #f4f4f9; padding-top: 30px; }
         .box { background: white; max-width: 900px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        input, textarea { display: block; width: 95%; margin: 10px auto; padding: 12px; font-family: sans-serif; font-size: 14px; box-sizing: border-box; }
+        input, textarea, select { display: block; width: 95%; margin: 10px auto; padding: 12px; font-family: sans-serif; font-size: 14px; box-sizing: border-box; }
         button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
         button:hover { opacity: 0.9; }
         .hidden { display: none; }
@@ -92,7 +92,7 @@
 
             <div class="card">
                 <h3>🌍 マイクラサーバー情報</h3>
-                <p><strong>ステータス:</strong> <span style="color: green; font-weight: bold;">● オンライン</span></p>
+                <p><strong>ステータス:</strong> <span id="server-status-display" style="font-weight: bold; color: green;">● オンライン</span></p>
                 <p><strong>サーバーアドレス (IP):</strong></p>
                 <div class="server-ip-box">
                     <div id="server-ip-text" class="server-ip">minecraft.example.com</div>
@@ -192,12 +192,26 @@
 
         <!-- ================= 5. 管理者専用設定タブ ================= -->
         <div id="tab-admin-settings" class="tab-content hidden" style="text-align: left;">
-            <div style="background: #fff8e1; border: 1px solid #ffe0b2; padding: 20px; border-radius: 6px;">
-                <h3 style="color: #f57c00; margin-top: 0;">⚙️ 管理者専用設定：ニューステロップ編集</h3>
+            <!-- テロップ編集セクション -->
+            <div style="background: #fff8e1; border: 1px solid #ffe0b2; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #f57c00; margin-top: 0;">⚙️ ニューステロップ編集</h3>
                 <p style="font-size: 14px; color: #555;">ホーム画面の上部に流れるテロップの文章をブラウザから自由に変更できます。</p>
                 <input type="text" id="telop-input" placeholder="テロップに表示するメッセージを入力" style="width: 100%;">
                 <button id="save-telop-btn" style="background: #ff9800; margin-top: 10px;">💾 テロップを更新する</button>
                 <span id="telop-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
+            </div>
+
+            <!-- ステータス変更セクション -->
+            <div style="background: #eef9ff; border: 1px solid #b3e5fc; padding: 20px; border-radius: 6px;">
+                <h3 style="color: #0288d1; margin-top: 0;">🌍 サーバーテータス変更</h3>
+                <p style="font-size: 14px; color: #555;">ホーム画面に表示されるマイクラサーバーの稼働状態を変更します。</p>
+                <select id="status-select">
+                    <option value="online">● オンライン</option>
+                    <option value="offline">● オフライン</option>
+                    <option value="maintenance">● メンテナンス中</option>
+                </select>
+                <button id="save-status-btn" style="background: #2196F3; margin-top: 10px;">💾 ステータスを更新する</button>
+                <span id="status-update-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
             </div>
         </div>
     </div>
@@ -242,6 +256,10 @@
         const telopStatus = document.getElementById('telop-status');
         const copyIpBtn = document.getElementById('copy-ip-btn');
         const serverIpText = document.getElementById('server-ip-text');
+        const serverStatusDisplay = document.getElementById('server-status-display');
+        const statusSelect = document.getElementById('status-select');
+        const saveStatusBtn = document.getElementById('save-status-btn');
+        const statusUpdateStatus = document.getElementById('status-update-status');
 
         let currentUserIsAdmin = false;
         let currentUserId = null;
@@ -293,7 +311,6 @@
             if (liveClock) {
                 liveClock.innerText = now.toLocaleDateString('ja-JP', options);
             }
-            // 毎秒時刻が変わるタイミングで挨拶も更新チェック
             updateGreeting();
         }
         setInterval(updateClock, 1000);
@@ -353,17 +370,40 @@
             setTimeout(() => { memoStatus.innerText = ""; }, 3000);
         });
 
-        // ニューステロップをFirestoreから読み込んで反映
-        async function loadTelop() {
+        // ステータス表示の見た目を反映させるヘルパー関数
+        function applyStatusDisplay(statusValue) {
+            if (statusValue === 'online') {
+                serverStatusDisplay.innerText = "● オンライン";
+                serverStatusDisplay.style.color = "green";
+            } else if (statusValue === 'offline') {
+                serverStatusDisplay.innerText = "● オフライン";
+                serverStatusDisplay.style.color = "red";
+            } else if (statusValue === 'maintenance') {
+                serverStatusDisplay.innerText = "● メンテナンス中";
+                serverStatusDisplay.style.color = "orange";
+            }
+        }
+
+        // サーバー設定（テロップ＆ステータス）をFirestoreから読み込んで反映
+        async function loadSettings() {
             try {
+                // テロップ読み込み
                 const telopDoc = await getDoc(doc(db, "settings", "telop"));
                 if (telopDoc.exists()) {
                     const text = telopDoc.data().text;
                     marqueeContent.innerText = text;
                     if (telopInput) telopInput.value = text;
                 }
+
+                // ステータス読み込み
+                const statusDoc = await getDoc(doc(db, "settings", "serverStatus"));
+                if (statusDoc.exists()) {
+                    const status = statusDoc.data().status;
+                    applyStatusDisplay(status);
+                    if (statusSelect) statusSelect.value = status;
+                }
             } catch (e) {
-                console.error("テロップ読み込みエラー: ", e);
+                console.error("設定読み込みエラー: ", e);
             }
         }
 
@@ -382,6 +422,20 @@
                 setTimeout(() => { telopStatus.innerText = ""; }, 3000);
             } catch (e) {
                 alert("更新に失敗しました: " + e.message);
+            }
+        });
+
+        // 管理者によるステータス更新処理
+        saveStatusBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const newStatus = statusSelect.value;
+            try {
+                await setDoc(doc(db, "settings", "serverStatus"), { status: newStatus });
+                applyStatusDisplay(newStatus);
+                statusUpdateStatus.innerText = "✓ ステータスを更新しました！";
+                setTimeout(() => { statusUpdateStatus.innerText = ""; }, 3000);
+            } catch (e) {
+                alert("ステータス更新に失敗しました: " + e.message);
             }
         });
 
@@ -515,7 +569,7 @@
                 
                 currentUserId = user.uid;
                 currentUserEmail = user.email;
-                updateGreeting(); // ログイン時に即時挨拶を反映
+                updateGreeting();
 
                 const savedMemo = localStorage.getItem(`minecraft_portal_memo_${currentUserId}`);
                 userMemoArea.value = savedMemo ? savedMemo : "";
@@ -534,7 +588,7 @@
                 }
 
                 loadPosts();
-                loadTelop();
+                loadSettings();
             } else {
                 loginSection.classList.remove('hidden');
                 portalSection.classList.add('hidden');

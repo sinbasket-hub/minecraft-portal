@@ -5,14 +5,14 @@
     <title>マイクラチーム ポータル</title>
     <style>
         body { font-family: sans-serif; text-align: center; margin: 0; background: #f4f4f9; padding-top: 30px; }
-        .box { background: white; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .box { background: white; max-width: 650px; margin: 0 auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input, textarea { display: block; width: 90%; margin: 10px auto; padding: 10px; font-family: sans-serif; }
         button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { opacity: 0.9; }
         .hidden { display: none; }
         
         /* ナビゲーションタブ */
-        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .tab-btn { background: #e0e0e0; color: #333; padding: 8px 16px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
         .tab-btn.active { background: #4CAF50; color: white; }
 
@@ -25,6 +25,14 @@
         .post-item { background: white; padding: 12px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
         .post-item a { color: #1e88e5; text-decoration: underline; font-weight: bold; }
         .delete-btn { background: #f44336; padding: 4px 10px; font-size: 12px; margin-top: 8px; }
+
+        /* ルールページのスタイル */
+        .rule-content { text-align: left; line-height: 1.7; color: #333; }
+        .rule-section { background: #fff; border: 1px solid #e0e0e0; border-left: 4px solid #ff9800; padding: 15px; margin-bottom: 20px; border-radius: 6px; }
+        .rule-section h3 { color: #d32f2f; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .rule-content ul { padding-left: 20px; }
+        .rule-content li { margin-bottom: 6px; }
+        .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 10px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -38,7 +46,7 @@
     </div>
 
     <!-- ログイン後メインポータル画面 -->
-    <div id="portal-section" class="box hidden" style="max-width: 650px;">
+    <div id="portal-section" class="box hidden" style="max-width: 700px;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px;">
             <h2 id="welcome-msg" style="margin: 0; font-size: 18px;">ようこそ！</h2>
             <button id="logout-btn" style="background: #f44336; padding: 6px 12px; font-size: 14px;">ログアウト</button>
@@ -47,7 +55,8 @@
         <!-- 画面切り替えタブ -->
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('home')">🏠 ホーム</button>
-            <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ掲示板</button>
+            <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ</button>
+            <button class="tab-btn" onclick="switchTab('rules')">📜 ルール</button>
         </div>
 
         <!-- ================= 1. ホームタブ（ダッシュボード） ================= -->
@@ -58,14 +67,6 @@
                 <p><strong>サーバーアドレス (IP):</strong></p>
                 <div class="server-ip">minecraft.example.com</div>
                 <p style="font-size: 13px; color: #666; margin-top: 8px;">Java版 / 統合版対応 (Ver 1.20.4)</p>
-            </div>
-
-            <div class="card" style="border-left-color: #ff9800; background: #fffaf0;">
-                <h3>🔗 クイックリンク</h3>
-                <p>ポータル管理や共有スペースへのショートカットです。</p>
-                <div style="margin-top: 10px;">
-                    <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: #2196F3; color: white; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-size: 14px; margin-right: 5px;">📁 Googleドライブを開く</a>
-                </div>
             </div>
 
             <div style="text-align: left; margin-top: 20px;">
@@ -88,6 +89,62 @@
             <div style="margin-top: 20px; text-align: left;">
                 <h3>📢 チームお知らせ一覧</h3>
                 <div id="news-posts-container">読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- ================= 3. ルールタブ ================= -->
+        <div id="tab-rules" class="tab-content hidden rule-content">
+            <h2>📜 サーバー利用ルール</h2>
+            
+            <!-- ルール① -->
+            <div class="rule-section">
+                <h3>ルール①</h3>
+                <p>Java 版マイクラをマルチプレイをする場合、VPN へ接続をしていただきます。<br>
+                セキュリティについては強く設定していますので、安心してください！<br>
+                マルチプレイをするには PC が必要となります。</p>
+                
+                <p><strong>◆接続手順◆</strong></p>
+                <ul>
+                    <li><strong>①</strong> SoftEther VPN Client をインストールします。（別でマニュアル作成済）</li>
+                    <li><strong>②</strong> SoftEther VPN のアカウントをお伝えします。</li>
+                    <li><strong>③</strong> Java 版マイクラの IP アドレスを共有します。</li>
+                </ul>
+                <p style="color: #d32f2f; font-weight: bold;">※ VPN アカウントは絶対に SNS や第三者へ共有しないでください。</p>
+            </div>
+
+            <!-- ルール② -->
+            <div class="rule-section">
+                <h3>ルール②</h3>
+                <p>VPN アカウントを正しく使ってほしいので注意項目を以下より確認してください。<br>
+                SoftEther VPN では基本「ユーザー名」と「PW」でアクセスすることができます。<br>
+                ですが特殊な設定にしています。接続先証明書を登録するため、クライアント (ユーザー側)の IP アドレスを管理者側で登録をかけています。<br>
+                そのため、別の PC から VPN へアクセスしようとしても接続拒否されます。登録をかけた PC じゃないとアクセスはできません。</p>
+                
+                <p>ログは常に AI を使って分析しているので、万が一、遊び感覚で別の PC からアカウントを入力してアクセスしようとすると不正アクセスと検知され、アクセス不可となるように設定しています。初期登録したら VPN 設定はいじらないでください！</p>
+
+                <p>特に注意してほしいのが、ノート PC やタブレット PC で Java 版マイクラをしているユーザーさんです。<br>
+                友人や親戚の家、フリーWi-Fi(カフェ、ホテル、携帯キャリア店など)へネット接続をして VPN にログインしてしまうと、<br>
+                IPアドレスが変わり、不正アクセス検知となり、アクセスすることができないので注意してください！<br>
+                外出先からマイクラをプレイしたい場合は、統合版をプレイしてください。</p>
+
+                <p style="font-size: 13px; color: #555;">
+                    ※ あくまで自宅に光回線、コンセント型ルーターに契約しいる方が対象です。<br>
+                      ポケット Wi-Fi やスマホのテザリングは NG となります。
+                </p>
+
+                <div class="warning-box">
+                    ⚠️複数回不正アクセス検知すると VPN アカウントは 一時停止となります⚠️
+                </div>
+            </div>
+
+            <!-- ルール③ -->
+            <div class="rule-section">
+                <h3>ルール③</h3>
+                <p>VPN アカウントとポータルサイトのアカウントも付与します。<br>
+                ポータルサイトは VPN に接続しないと閲覧できないようになっています。<br>
+                Java 版マイクラをプレイする前に必ずポータルサイトのお知らせ欄を確認してください。<br>
+                メンテナンス中で起動しなかったり、PC 再起動で一時的にオフラインになっていることがあります。<br>
+                その都度、お知らせへ投稿していくので確認お願いします！</p>
             </div>
         </div>
     </div>
@@ -128,6 +185,7 @@
         window.switchTab = function(tabName) {
             document.getElementById('tab-home').classList.add('hidden');
             document.getElementById('tab-news').classList.add('hidden');
+            document.getElementById('tab-rules').classList.add('hidden');
             
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
@@ -137,6 +195,9 @@
                 event.target.classList.add('active');
             } else if (tabName === 'news') {
                 document.getElementById('tab-news').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'rules') {
+                document.getElementById('tab-rules').classList.remove('hidden');
                 event.target.classList.add('active');
             }
         };
@@ -156,7 +217,7 @@
             signOut(auth);
         });
 
-        // リンク解析関数（文字埋め込み＆通常URL両対応）
+        // リンク解析関数
         function parseLinks(text) {
             if (!text) return "";
             const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
@@ -200,7 +261,7 @@
             }
         };
 
-        // お知らせをFirestoreから取得してホームと掲示板の両方に表示する関数
+        // お知らせをFirestoreから取得して表示する関数
         async function loadPosts() {
             homePostsContainer.innerHTML = "読み込み中...";
             newsPostsContainer.innerHTML = "読み込み中...";
@@ -237,7 +298,6 @@
                     `;
 
                     newsHtml += itemHtml;
-                    // ホーム画面には最新の3件だけを表示する
                     if (count < 3) {
                         homeHtml += itemHtml;
                         count++;

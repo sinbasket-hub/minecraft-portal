@@ -12,6 +12,7 @@
         .admin-box { background: #ffffe0; padding: 10px; margin-top: 15px; border-radius: 6px; text-align: left; }
         .post-item { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
         .post-item a { color: #1e88e5; text-decoration: underline; font-weight: bold; }
+        .delete-btn { background: #f44336; padding: 4px 10px; font-size: 12px; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -49,7 +50,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDgkLmZc-mgdVzPQpyreco57OeqkdU8cG8",
@@ -74,6 +75,9 @@
         const postBtn = document.getElementById('post-btn');
         const postsContainer = document.getElementById('posts-container');
 
+        // 現在のユーザーが管理者かどうかを保持するフラグ
+        let currentUserIsAdmin = false;
+
         // ログイン処理
         loginBtn.addEventListener('click', () => {
             const email = document.getElementById('email').value;
@@ -89,25 +93,18 @@
             signOut(auth);
         });
 
-        // Markdown形式 [表示名](URL) および通常URLをリンクに変換する関数
+        // Markdown形式 および通常URLをリンクに変換する関数
         function parseLinks(text) {
-            // 1. まずHTMLエスケープして安全にする
             let safeText = escapeHtml(text);
-
-            // 2. [表示名](URL) の形式をリンクに変換
             const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/[^\s)]+)\)/g;
             safeText = safeText.replace(markdownLinkRegex, function(match, label, url) {
                 return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
             });
-
-            // 3. 変換されなかった通常のURL（https://...）も自動でリンクに変換
             const urlRegex = /(https?:\/\/[^\s<]+)/g;
             safeText = safeText.replace(urlRegex, function(url) {
-                // すでに<a>タグで囲まれている場合は二重置換しないように簡易チェック
                 if (url.includes('href=')) return url;
                 return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
             });
-
             return safeText;
         }
 
@@ -115,6 +112,19 @@
         function escapeHtml(str) {
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
+
+        // お知らせを削除する関数（グローバルに公開）
+        window.deletePost = async function(docId) {
+            if (confirm("本当にこのお知らせを削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "posts", docId));
+                    alert("お知らせを削除しました。");
+                    loadPosts(); // 一覧を再読み込み
+                } catch (e) {
+                    alert("削除に失敗しました: " + e.message);
+                }
+            }
+        };
 
         // お知らせをFirestoreから取得して表示する関数
         async function loadPosts() {
@@ -131,11 +141,20 @@
                 let html = "";
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
+                    const docId = docSnap.id;
+
+                    // 管理者の場合のみ削除ボタンを表示する
+                    let deleteButtonHtml = "";
+                    if (currentUserIsAdmin) {
+                        deleteButtonHtml = `<button class="delete-btn" onclick="deletePost('${docId}')">削除</button>`;
+                    }
+
                     html += `
                         <div class="post-item">
                             <h4 style="margin: 0 0 5px 0;">${escapeHtml(data.title)}</h4>
                             <p style="margin: 0; white-space: pre-wrap;">${parseLinks(data.content)}</p>
                             <small style="color: gray;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
+                            <div>${deleteButtonHtml}</div>
                         </div>
                     `;
                 });
@@ -184,8 +203,10 @@
 
                 if (userDoc.exists() && userDoc.data().role === 'admin') {
                     adminArea.classList.remove('hidden');
+                    currentUserIsAdmin = true; // 管理者フラグをON
                 } else {
                     adminArea.classList.add('hidden');
+                    currentUserIsAdmin = false;
                 }
 
                 loadPosts();
@@ -193,6 +214,7 @@
                 loginSection.classList.remove('hidden');
                 portalSection.classList.add('hidden');
                 adminArea.classList.add('hidden');
+                currentUserIsAdmin = false;
             }
         });
     </script>

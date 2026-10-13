@@ -5,10 +5,12 @@
     <title>マイクラチーム ポータル</title>
     <style>
         body { font-family: sans-serif; text-align: center; margin-top: 50px; background: #f4f4f9; }
-        .box { background: white; max-width: 400px; margin: 0 auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input { display: block; width: 90%; margin: 10px auto; padding: 10px; }
+        .box { background: white; max-width: 500px; margin: 0 auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, textarea { display: block; width: 90%; margin: 10px auto; padding: 10px; font-family: sans-serif; }
         button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
         .hidden { display: none; }
+        .admin-box { background: #ffffe0; padding: 10px; margin-top: 15px; border-radius: 6px; text-align: left; }
+        .post-item { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -24,31 +26,39 @@
     <!-- ログイン後画面 -->
     <div id="portal-section" class="box hidden">
         <h1 id="welcome-msg">ようこそ！</h1>
-        <div id="admin-area" class="hidden" style="background: #ffffe0; padding: 10px; margin-top: 15px;">
-            <h3>[管理者メニュー]</h3>
-            <p>お知らせの追加などがここに表示されます。</p>
+        
+        <!-- 管理者メニュー（お知らせ投稿フォーム） -->
+        <div id="admin-area" class="hidden admin-box">
+            <h3>[管理者メニュー] お知らせ投稿</h3>
+            <input type="text" id="post-title" placeholder="お知らせのタイトル">
+            <textarea id="post-content" placeholder="お知らせの内容" rows="3"></textarea>
+            <button id="post-btn">投稿する</button>
         </div>
+
+        <!-- お知らせ一覧エリア -->
+        <div style="margin-top: 20px; text-align: left;">
+            <h3>📢 チームお知らせ一覧</h3>
+            <div id="posts-container">読み込み中...</div>
+        </div>
+
         <button id="logout-btn" style="background: #f44336; margin-top: 20px;">ログアウト</button>
     </div>
 
     <!-- Firebaseのスクリプト読み込みと処理 -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-
-        // TODO: ステップ1でコピーしたご自身のfirebaseConfigの内容に書き換えてください
-       const firebaseConfig = {
-  apiKey: "AIzaSyDgkLmZc-mgdVzPQpyreco57OeqkdU8cG8",
-  authDomain: "minecraft-portal-f3409.firebaseapp.com",
-  projectId: "minecraft-portal-f3409",
-  storageBucket: "minecraft-portal-f3409.firebasestorage.app",
-  messagingSenderId: "298086078718",
-  appId: "1:298086078718:web:7a1e0da291ad60d4392daf",
-  measurementId: "G-SBJ7GE98DB"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgkLmZc-mgdVzPQpyreco57OeqkdU8cG8",
+            authDomain: "minecraft-portal-f3409.firebaseapp.com",
+            projectId: "minecraft-portal-f3409",
+            storageBucket: "minecraft-portal-f3409.firebasestorage.app",
+            messagingSenderId: "298086078718",
+            appId: "1:298086078718:web:7a1e0da291ad60d4392daf",
+            measurementId: "G-SBJ7GE98DB"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -60,6 +70,8 @@
         const portalSection = document.getElementById('portal-section');
         const adminArea = document.getElementById('admin-area');
         const welcomeMsg = document.getElementById('welcome-msg');
+        const postBtn = document.getElementById('post-btn');
+        const postsContainer = document.getElementById('posts-container');
 
         // ログイン処理
         loginBtn.addEventListener('click', () => {
@@ -76,24 +88,86 @@
             signOut(auth);
         });
 
-        // ログイン状態の監視 ＆ 権限（ロール）の判定
+        // お知らせをFirestoreから取得して表示する関数
+        async function loadPosts() {
+            postsContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    postsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
+                    return;
+                }
+
+                let html = "";
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    html += `
+                        <div class="post-item">
+                            <h4 style="margin: 0 0 5px 0;">${escapeHtml(data.title)}</h4>
+                            <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(data.content)}</p>
+                            <small style="color: gray;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
+                        </div>
+                    `;
+                });
+                postsContainer.innerHTML = html;
+            } catch (e) {
+                console.error("お知らせ読み込みエラー: ", e);
+                postsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
+            }
+        }
+
+        // HTMLエスケープ用関数（セキュリティ対策）
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        // お知らせ投稿処理
+        postBtn.addEventListener('click', async () => {
+            const title = document.getElementById('post-title').value.trim();
+            const content = document.getElementById('post-content').value.trim();
+
+            if (!title || !content) {
+                alert('タイトルと内容を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "posts"), {
+                    title: title,
+                    content: content,
+                    author: auth.currentUser.email,
+                    createdAt: new Date()
+                });
+                alert('お知らせを投稿しました！');
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-content').value = '';
+                loadPosts(); // 一覧を再読み込み
+            } catch (e) {
+                alert('投稿に失敗しました: ' + e.message);
+            }
+        });
+
+        // ログイン状態の監視 ＆ 権限判定
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginSection.classList.add('hidden');
                 portalSection.classList.remove('hidden');
                 welcomeMsg.innerText = `${user.email} さん、こんにちは！`;
 
-                // Firestoreの 'users' コレクションからユーザーの権限を取得する
+                // Firestoreの 'users' コレクションから権限を取得
                 const userDocRef = doc(db, "users", user.uid);
                 const userDoc = await getDoc(userDocRef);
 
                 if (userDoc.exists() && userDoc.data().role === 'admin') {
-                    // 管理者の場合
                     adminArea.classList.remove('hidden');
                 } else {
-                    // 一般会員の場合
                     adminArea.classList.add('hidden');
                 }
+
+                // お知らせを読み込む
+                loadPosts();
             } else {
                 loginSection.classList.remove('hidden');
                 portalSection.classList.add('hidden');

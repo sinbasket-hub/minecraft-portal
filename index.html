@@ -11,7 +11,7 @@
         .hidden { display: none; }
         .admin-box { background: #ffffe0; padding: 10px; margin-top: 15px; border-radius: 6px; text-align: left; }
         .post-item { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
-        .post-item a { color: #1e88e5; text-decoration: underline; }
+        .post-item a { color: #1e88e5; text-decoration: underline; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -32,7 +32,7 @@
         <div id="admin-area" class="hidden admin-box">
             <h3>[管理者メニュー] お知らせ投稿</h3>
             <input type="text" id="post-title" placeholder="お知らせのタイトル">
-            <textarea id="post-content" placeholder="お知らせの内容（URLを入れると自動でリンクになります）" rows="3"></textarea>
+            <textarea id="post-content" placeholder="例: [Googleドライブはこちら](https://...) のように書くと文字に埋め込みできます" rows="3"></textarea>
             <button id="post-btn">投稿する</button>
         </div>
 
@@ -89,17 +89,29 @@
             signOut(auth);
         });
 
-        // テキスト内のURLを自動でリンク（<a>タグ）に変換する関数
-        function linkify(text) {
-            const safeText = escapeHtml(text);
-            // http:// または https:// で始まる文字列を自動でリンク化する正規表現
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            return safeText.replace(urlRegex, function(url) {
+        // Markdown形式 [表示名](URL) および通常URLをリンクに変換する関数
+        function parseLinks(text) {
+            // 1. まずHTMLエスケープして安全にする
+            let safeText = escapeHtml(text);
+
+            // 2. [表示名](URL) の形式をリンクに変換
+            const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/[^\s)]+)\)/g;
+            safeText = safeText.replace(markdownLinkRegex, function(match, label, url) {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+            });
+
+            // 3. 変換されなかった通常のURL（https://...）も自動でリンクに変換
+            const urlRegex = /(https?:\/\/[^\s<]+)/g;
+            safeText = safeText.replace(urlRegex, function(url) {
+                // すでに<a>タグで囲まれている場合は二重置換しないように簡易チェック
+                if (url.includes('href=')) return url;
                 return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
             });
+
+            return safeText;
         }
 
-        // HTMLエスケープ用関数（セキュリティ対策）
+        // HTMLエスケープ用関数
         function escapeHtml(str) {
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
@@ -122,7 +134,7 @@
                     html += `
                         <div class="post-item">
                             <h4 style="margin: 0 0 5px 0;">${escapeHtml(data.title)}</h4>
-                            <p style="margin: 0; white-space: pre-wrap;">${linkify(data.content)}</p>
+                            <p style="margin: 0; white-space: pre-wrap;">${parseLinks(data.content)}</p>
                             <small style="color: gray;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
                         </div>
                     `;
@@ -154,7 +166,7 @@
                 alert('お知らせを投稿しました！');
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-content').value = '';
-                loadPosts(); // 一覧を再読み込み
+                loadPosts();
             } catch (e) {
                 alert('投稿に失敗しました: ' + e.message);
             }
@@ -167,7 +179,6 @@
                 portalSection.classList.remove('hidden');
                 welcomeMsg.innerText = `${user.email} さん、こんにちは！`;
 
-                // Firestoreの 'users' コレクションから権限を取得
                 const userDocRef = doc(db, "users", user.uid);
                 const userDoc = await getDoc(userDocRef);
 
@@ -177,7 +188,6 @@
                     adminArea.classList.add('hidden');
                 }
 
-                // お知らせを読み込む
                 loadPosts();
             } else {
                 loginSection.classList.remove('hidden');

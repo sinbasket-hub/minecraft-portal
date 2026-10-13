@@ -92,23 +92,25 @@
             signOut(auth);
         });
 
-        // リンク解析関数（順序を正しく修正）
+        // リンク解析関数（より確実に [表示名](URL) を抽出するロジック）
         function parseLinks(text) {
+            // 1. 一旦セキュリティのためHTMLエスケープ
             let safeText = escapeHtml(text);
 
-            // 1. まず [表示名](URL) の形式を優先して変換
-            const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s<)]+)\)/g;
+            // 2. [表示名](URL) を確実にキャッチする正規表現
+            // URL部分にどんな文字（?=や/など）が入っても閉じカッコ ) までを正しく取得します
+            const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
             safeText = safeText.replace(markdownLinkRegex, function(match, label, url) {
-                let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '');
+                // エスケープされてしまったアンパーサンド(&amp;)などを元に戻す
+                let cleanUrl = url.replace(/&amp;/g, '&').trim();
                 return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
             });
 
-            // 2. その後、マークダウン化されずに残った通常のURL（https://...）を自動リンク化
+            // 3. マークダウン化されずに残った通常のURLをリンクに変換
             const urlRegex = /(https?:\/\/[^\s<]+)/g;
             safeText = safeText.replace(urlRegex, function(url) {
-                // すでにHTMLタグの一部になっている場合は変換しない
                 if (url.includes('href=') || url.includes('target=')) return url;
-                let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '');
+                let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '').replace(/&amp;/g, '&');
                 return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
             });
 

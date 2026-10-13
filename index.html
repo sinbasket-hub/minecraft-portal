@@ -37,6 +37,8 @@
         .post-item { background: white; padding: 15px; margin: 12px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
         .post-item a { color: #1e88e5; text-decoration: underline; font-weight: bold; }
         .delete-btn { background: #f44336; padding: 6px 12px; font-size: 12px; margin-top: 10px; }
+        .like-btn { background: #e0e0e0; color: #333; padding: 6px 14px; font-size: 13px; border-radius: 20px; margin-top: 8px; border: none; cursor: pointer; font-weight: bold; }
+        .like-btn.liked { background: #ff4081; color: white; }
 
         /* ルールページのスタイル */
         .rule-content { text-align: left; line-height: 1.8; color: #333; font-size: 15px; }
@@ -49,6 +51,11 @@
         /* 内部メモのスタイル */
         .memo-content { text-align: left; }
         .memo-textarea { width: 100%; height: 350px; padding: 15px; font-size: 15px; line-height: 1.6; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; }
+        
+        /* いいね確認テーブル */
+        .like-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white; }
+        .like-table th, .like-table td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+        .like-table th { background: #f5f5f5; }
     </style>
 </head>
 <body>
@@ -202,7 +209,7 @@
             </div>
 
             <!-- ステータス変更セクション -->
-            <div style="background: #eef9ff; border: 1px solid #b3e5fc; padding: 20px; border-radius: 6px;">
+            <div style="background: #eef9ff; border: 1px solid #b3e5fc; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
                 <h3 style="color: #0288d1; margin-top: 0;">🌍 サーバーテータス変更</h3>
                 <p style="font-size: 14px; color: #555;">ホーム画面に表示されるマイクラサーバーの稼働状態を変更します。</p>
                 <select id="status-select">
@@ -213,6 +220,13 @@
                 <button id="save-status-btn" style="background: #2196F3; margin-top: 10px;">💾 ステータスを更新する</button>
                 <span id="status-update-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
             </div>
+
+            <!-- いいね確認セクション -->
+            <div style="background: #fce4ec; border: 1px solid #f8bbd0; padding: 20px; border-radius: 6px;">
+                <h3 style="color: #c2185b; margin-top: 0;">❤️ いいね確認リーダー</h3>
+                <p style="font-size: 14px; color: #555;">メンバーがどの記事に「いいね！」を押したのか一覧で確認できます。</p>
+                <div id="admin-likes-container">読み込み中...</div>
+            </div>
         </div>
     </div>
 
@@ -220,7 +234,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDgkLmZc-mgdVzPQpyreco57OeqkdU8cG8",
@@ -260,40 +274,34 @@
         const statusSelect = document.getElementById('status-select');
         const saveStatusBtn = document.getElementById('save-status-btn');
         const statusUpdateStatus = document.getElementById('status-update-status');
+        const adminLikesContainer = document.getElementById('admin-likes-container');
 
         let currentUserIsAdmin = false;
         let vpnWatchInterval = null;
         let idleLogoutTimer = null;
 
-        // 【10分無操作自動ログアウトの仕組み】
-        const IDLE_TIMEOUT = 10 * 60 * 1000; // 10分 (ミリ秒)
+        const IDLE_TIMEOUT = 10 * 60 * 1000;
 
         function resetIdleTimer() {
             if (!auth.currentUser) return;
             if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
-            
             idleLogoutTimer = setTimeout(() => {
-                console.log("10分間操作がなかったため自動ログアウトします。");
                 alert("10分間操作がなかったため、セキュリティ保護のため自動ログアウトしました。");
                 signOut(auth);
             }, IDLE_TIMEOUT);
         }
 
-        // ユーザーの動き（マウス、キーボード、クリックなど）を検知してタイマーをリセット
         ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(event => {
             window.addEventListener(event, resetIdleTimer);
         });
 
-        // 【VPN死活監視】定期的にサーバーと通信を試み、切断されていたら強制的に画面をシャットアウトする
         function startVpnWatchdog() {
             if (vpnWatchInterval) clearInterval(vpnWatchInterval);
-            
             vpnWatchInterval = setInterval(async () => {
                 if (!auth.currentUser) return;
                 try {
                     await getDoc(doc(db, "settings", "serverStatus"));
                 } catch (error) {
-                    console.warn("VPN接続断を検知しました。画面を破棄します。");
                     document.body.innerHTML = `
                         <div style="background: #222; color: #ff5252; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; text-align: center; padding: 20px;">
                             <h1 style="font-size: 28px; margin-bottom: 10px;">⚠️ VPN接続が切断されました</h1>
@@ -309,7 +317,6 @@
             }, 4000);
         }
 
-        // IPアドレスコピー機能
         copyIpBtn.addEventListener('click', () => {
             const ipText = serverIpText.innerText;
             navigator.clipboard.writeText(ipText).then(() => {
@@ -319,12 +326,9 @@
                     copyIpBtn.innerText = "📋 IPをコピー";
                     copyIpBtn.style.background = "#2196F3";
                 }, 2000);
-            }).catch(err => {
-                alert("コピーに失敗しました: " + err);
             });
         });
 
-        // 挨拶メッセージを時刻に合わせて生成する関数
         function updateGreeting(email) {
             if (!email) return;
             const hour = new Date().getHours();
@@ -339,19 +343,9 @@
             welcomeMsg.innerText = `${email} さん、${greeting}`;
         }
 
-        // リアルタイム時計の更新
         function updateClock() {
             const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                weekday: 'short', 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit',
-                hour12: false 
-            };
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
             if (liveClock) {
                 liveClock.innerText = now.toLocaleDateString('ja-JP', options);
             }
@@ -362,7 +356,6 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // タブ切り替え関数をグローバルに公開
         window.switchTab = function(tabName) {
             document.getElementById('tab-home').classList.add('hidden');
             document.getElementById('tab-news').classList.add('hidden');
@@ -389,10 +382,10 @@
             } else if (tabName === 'admin-settings') {
                 if (adminSettingsTab) adminSettingsTab.classList.remove('hidden');
                 event.target.classList.add('active');
+                loadAdminLikes(); // 管理者設定タブを開いた時にいいね一覧を読み込む
             }
         };
 
-        // ログイン処理
         loginBtn.addEventListener('click', () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -402,14 +395,12 @@
                 });
         });
 
-        // ログアウト処理
         logoutBtn.addEventListener('click', () => {
             if (vpnWatchInterval) clearInterval(vpnWatchInterval);
             if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
             signOut(auth);
         });
 
-        // メモの保存処理
         saveMemoBtn.addEventListener('click', () => {
             const user = auth.currentUser;
             if (!user) return;
@@ -419,7 +410,6 @@
             setTimeout(() => { memoStatus.innerText = ""; }, 3000);
         });
 
-        // ステータス表示の見た目を反映させるヘルパー関数
         function applyStatusDisplay(statusValue) {
             if (statusValue === 'online') {
                 serverStatusDisplay.innerText = "● オンライン";
@@ -433,7 +423,6 @@
             }
         }
 
-        // サーバー設定（テロップ＆ステータス）をFirestoreから読み込んで反映
         async function loadSettings() {
             try {
                 const telopDoc = await getDoc(doc(db, "settings", "telop"));
@@ -454,7 +443,6 @@
             }
         }
 
-        // 管理者によるテロップ更新処理
         saveTelopBtn.addEventListener('click', async () => {
             if (!currentUserIsAdmin) return;
             const newText = telopInput.value.trim();
@@ -472,7 +460,6 @@
             }
         });
 
-        // 管理者によるステータス更新処理
         saveStatusBtn.addEventListener('click', async () => {
             if (!currentUserIsAdmin) return;
             const newStatus = statusSelect.value;
@@ -486,7 +473,6 @@
             }
         });
 
-        // リンク解析関数
         function parseLinks(text) {
             if (!text) return "";
             const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
@@ -512,12 +498,10 @@
             return parts.join('');
         }
 
-        // HTMLエスケープ用関数
         function escapeHtml(str) {
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
-        // お知らせを削除する関数
         window.deletePost = async function(docId) {
             if (confirm("本当にこのお知らせを削除しますか？")) {
                 try {
@@ -530,7 +514,74 @@
             }
         };
 
-        // お知らせをFirestoreから取得して表示する関数
+        // いいねボタンのトグル処理
+        window.toggleLike = async function(docId) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const postRef = doc(db, "posts", docId);
+            const postSnap = await getDoc(postRef);
+            if (!postSnap.exists()) return;
+
+            const data = postSnap.data();
+            const likes = data.likes || [];
+            const userEmail = user.email;
+
+            try {
+                if (likes.includes(userEmail)) {
+                    // すでにいいねしていれば削除（解除）
+                    await updateDoc(postRef, {
+                        likes: arrayRemove(userEmail)
+                    });
+                } else {
+                    // いいね追加
+                    await updateDoc(postRef, {
+                        likes: arrayUnion(userEmail)
+                    });
+                }
+                loadPosts();
+            } catch (e) {
+                alert("いいね処理に失敗しました: " + e.message);
+            }
+        };
+
+        // 管理者画面の「いいね確認リーダー」表示用関数
+        async function loadAdminLikes() {
+            if (!currentUserIsAdmin) return;
+            adminLikesContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    adminLikesContainer.innerHTML = "<p>お知らせはまだありません。</p>";
+                    return;
+                }
+
+                let html = `<table class="like-table"><tr><th>お知らせタイトル</th><th>いいね数</th><th>いいねしたユーザー (メールアドレス)</th></tr>`;
+                
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const title = escapeHtml(data.title || '無題');
+                    const likes = data.likes || [];
+                    const likesCount = likes.length;
+                    const likesUsersStr = likes.length > 0 ? likes.map(email => escapeHtml(email)).join(', ') : '<span style="color: gray;">なし</span>';
+
+                    html += `<tr>
+                        <td><strong>${title}</strong></td>
+                        <td style="text-align: center;">❤️ ${likesCount}</td>
+                        <td>${likesUsersStr}</td>
+                    </tr>`;
+                });
+
+                html += `</table>`;
+                adminLikesContainer.innerHTML = html;
+            } catch (e) {
+                console.error("いいね一覧読み込みエラー: ", e);
+                adminLikesContainer.innerHTML = "<p>読み込みに失敗しました。</p>";
+            }
+        }
+
         async function loadPosts() {
             homePostsContainer.innerHTML = "読み込み中...";
             newsPostsContainer.innerHTML = "読み込み中...";
@@ -547,10 +598,15 @@
                 let newsHtml = "";
                 let homeHtml = "";
                 let count = 0;
+                const currentUserEmail = auth.currentUser ? auth.currentUser.email : "";
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const docId = docSnap.id;
+                    const likes = data.likes || [];
+                    const hasLiked = likes.includes(currentUserEmail);
+                    const likeBtnClass = hasLiked ? "like-btn liked" : "like-btn";
+                    const likeBtnText = hasLiked ? `❤️ いいね済み (${likes.length})` : `🤍 いいね (${likes.length})`;
 
                     let deleteButtonHtml = "";
                     if (currentUserIsAdmin) {
@@ -562,7 +618,10 @@
                             <h4 style="margin: 0 0 8px 0; font-size: 16px;">${escapeHtml(data.title)}</h4>
                             <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${parseLinks(data.content)}</p>
                             <small style="color: gray; display: inline-block; margin-top: 5px;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
-                            <div>${deleteButtonHtml}</div>
+                            <div>
+                                <button class="${likeBtnClass}" onclick="toggleLike('${docId}')">${likeBtnText}</button>
+                                ${deleteButtonHtml}
+                            </div>
                         </div>
                     `;
 
@@ -582,7 +641,6 @@
             }
         }
 
-        // お知らせ投稿処理
         postBtn.addEventListener('click', async () => {
             const title = document.getElementById('post-title').value.trim();
             const content = document.getElementById('post-content').value.trim();
@@ -597,7 +655,8 @@
                     title: title,
                     content: content,
                     author: auth.currentUser.email,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    likes: [] // 初期いいね配列
                 });
                 alert('お知らせを投稿しました！');
                 document.getElementById('post-title').value = '';
@@ -608,7 +667,6 @@
             }
         });
 
-        // ログイン状態の監視 ＆ 権限判定・メモ復元・自動ログアウトタイマー開始
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginSection.classList.add('hidden');
@@ -635,7 +693,7 @@
                 loadPosts();
                 loadSettings();
                 startVpnWatchdog();
-                resetIdleTimer(); // 10分タイマー起動
+                resetIdleTimer();
             } else {
                 if (vpnWatchInterval) clearInterval(vpnWatchInterval);
                 if (idleLogoutTimer) clearTimeout(idleLogoutTimer);

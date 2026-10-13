@@ -5,51 +5,52 @@
     <title>マイクラチーム ポータル</title>
     <style>
         body { font-family: sans-serif; text-align: center; margin: 0; background: #f4f4f9; padding-top: 30px; }
-        .box { background: white; max-width: 650px; margin: 0 auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input, textarea { display: block; width: 90%; margin: 10px auto; padding: 10px; font-family: sans-serif; }
-        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        /* 全体のボックスを広めに変更 (max-width: 900px) */
+        .box { background: white; max-width: 900px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        input, textarea { display: block; width: 95%; margin: 10px auto; padding: 12px; font-family: sans-serif; font-size: 14px; box-sizing: border-box; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
         button:hover { opacity: 0.9; }
         .hidden { display: none; }
         
         /* ナビゲーションタブ */
-        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn { background: #e0e0e0; color: #333; padding: 8px 16px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
+        .nav-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn { background: #e0e0e0; color: #333; padding: 10px 24px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; font-size: 15px; }
         .tab-btn.active { background: #4CAF50; color: white; }
 
         /* ダッシュボードカード */
-        .card { background: #eef9ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; text-align: left; border-radius: 4px; }
-        .server-ip { background: #333; color: #4CAF50; padding: 8px 12px; font-family: monospace; font-size: 16px; border-radius: 4px; display: inline-block; user-select: all; }
+        .card { background: #eef9ff; border-left: 4px solid #2196F3; padding: 20px; margin-bottom: 20px; text-align: left; border-radius: 4px; }
+        .server-ip { background: #333; color: #4CAF50; padding: 10px 15px; font-family: monospace; font-size: 18px; border-radius: 4px; display: inline-block; user-select: all; }
         
         /* 管理・投稿エリア */
-        .admin-box { background: #ffffe0; padding: 15px; margin-top: 15px; border-radius: 6px; text-align: left; border: 1px dashed #ffd700; }
-        .post-item { background: white; padding: 12px; margin: 10px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
+        .admin-box { background: #ffffe0; padding: 20px; margin-top: 15px; border-radius: 6px; text-align: left; border: 1px dashed #ffd700; }
+        .post-item { background: white; padding: 15px; margin: 12px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
         .post-item a { color: #1e88e5; text-decoration: underline; font-weight: bold; }
-        .delete-btn { background: #f44336; padding: 4px 10px; font-size: 12px; margin-top: 8px; }
+        .delete-btn { background: #f44336; padding: 6px 12px; font-size: 12px; margin-top: 10px; }
 
         /* ルールページのスタイル */
-        .rule-content { text-align: left; line-height: 1.7; color: #333; }
-        .rule-section { background: #fff; border: 1px solid #e0e0e0; border-left: 4px solid #ff9800; padding: 15px; margin-bottom: 20px; border-radius: 6px; }
-        .rule-section h3 { color: #d32f2f; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        .rule-content ul { padding-left: 20px; }
-        .rule-content li { margin-bottom: 6px; }
-        .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 10px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 10px; text-align: center; }
+        .rule-content { text-align: left; line-height: 1.8; color: #333; font-size: 15px; }
+        .rule-section { background: #fff; border: 1px solid #e0e0e0; border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 25px; border-radius: 6px; }
+        .rule-section h3 { color: #d32f2f; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 18px; }
+        .rule-content ul { padding-left: 25px; }
+        .rule-content li { margin-bottom: 8px; }
+        .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
     <!-- ログイン前画面 -->
-    <div id="login-section" class="box">
+    <div id="login-section" class="box" style="max-width: 450px;">
         <h2>マイクラポータル ログイン</h2>
         <input type="email" id="email" placeholder="メールアドレス">
         <input type="password" id="password" placeholder="パスワード">
-        <button id="login-btn">ログイン</button>
+        <button id="login-btn" style="width: 95%; margin-top: 15px;">ログイン</button>
     </div>
 
     <!-- ログイン後メインポータル画面 -->
-    <div id="portal-section" class="box hidden" style="max-width: 700px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px;">
-            <h2 id="welcome-msg" style="margin: 0; font-size: 18px;">ようこそ！</h2>
-            <button id="logout-btn" style="background: #f44336; padding: 6px 12px; font-size: 14px;">ログアウト</button>
+    <div id="portal-section" class="box hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 25px;">
+            <h2 id="welcome-msg" style="margin: 0; font-size: 20px;">ようこそ！</h2>
+            <button id="logout-btn" style="background: #f44336; padding: 8px 16px; font-size: 14px;">ログアウト</button>
         </div>
 
         <!-- 画面切り替えタブ -->
@@ -66,10 +67,10 @@
                 <p><strong>ステータス:</strong> <span style="color: green; font-weight: bold;">● オンライン</span></p>
                 <p><strong>サーバーアドレス (IP):</strong></p>
                 <div class="server-ip">minecraft.example.com</div>
-                <p style="font-size: 13px; color: #666; margin-top: 8px;">Java版 / 統合版対応 (Ver 1.20.4)</p>
+                <p style="font-size: 13px; color: #666; margin-top: 10px;">Java版 / 統合版対応 (Ver 1.20.4)</p>
             </div>
 
-            <div style="text-align: left; margin-top: 20px;">
+            <div style="text-align: left; margin-top: 25px;">
                 <h3>📌 最新のお知らせ（抜粋）</h3>
                 <div id="home-posts-container">読み込み中...</div>
             </div>
@@ -81,12 +82,12 @@
             <div id="admin-area" class="hidden admin-box">
                 <h3>[管理者メニュー] お知らせ投稿</h3>
                 <input type="text" id="post-title" placeholder="お知らせのタイトル">
-                <textarea id="post-content" placeholder="例: [ファイル共有](https://...) のように書けます" rows="3"></textarea>
+                <textarea id="post-content" placeholder="例: [ファイル共有](https://...) のように書けます" rows="4"></textarea>
                 <button id="post-btn">投稿する</button>
             </div>
 
             <!-- お知らせ一覧エリア -->
-            <div style="margin-top: 20px; text-align: left;">
+            <div style="margin-top: 25px; text-align: left;">
                 <h3>📢 チームお知らせ一覧</h3>
                 <div id="news-posts-container">読み込み中...</div>
             </div>
@@ -127,7 +128,7 @@
                 IPアドレスが変わり、不正アクセス検知となり、アクセスすることができないので注意してください！<br>
                 外出先からマイクラをプレイしたい場合は、統合版をプレイしてください。</p>
 
-                <p style="font-size: 13px; color: #555;">
+                <p style="font-size: 14px; color: #555;">
                     ※ あくまで自宅に光回線、コンセント型ルーターに契約しいる方が対象です。<br>
                       ポケット Wi-Fi やスマホのテザリングは NG となります。
                 </p>
@@ -290,9 +291,9 @@
 
                     const itemHtml = `
                         <div class="post-item">
-                            <h4 style="margin: 0 0 5px 0;">${escapeHtml(data.title)}</h4>
-                            <p style="margin: 0; white-space: pre-wrap;">${parseLinks(data.content)}</p>
-                            <small style="color: gray;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
+                            <h4 style="margin: 0 0 8px 0; font-size: 16px;">${escapeHtml(data.title)}</h4>
+                            <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${parseLinks(data.content)}</p>
+                            <small style="color: gray; display: inline-block; margin-top: 5px;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
                             <div>${deleteButtonHtml}</div>
                         </div>
                     `;

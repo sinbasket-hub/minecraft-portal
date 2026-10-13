@@ -33,7 +33,7 @@
         <div id="admin-area" class="hidden admin-box">
             <h3>[管理者メニュー] お知らせ投稿</h3>
             <input type="text" id="post-title" placeholder="お知らせのタイトル">
-            <textarea id="post-content" placeholder="例: [Googleドライブはこちら](https://...) のように書くと文字に埋め込みできます" rows="3"></textarea>
+            <textarea id="post-content" placeholder="例: [Googleドライブ](https://...) のように書けます" rows="3"></textarea>
             <button id="post-btn">投稿する</button>
         </div>
 
@@ -75,7 +75,6 @@
         const postBtn = document.getElementById('post-btn');
         const postsContainer = document.getElementById('posts-container');
 
-        // 現在のユーザーが管理者かどうかを保持するフラグ
         let currentUserIsAdmin = false;
 
         // ログイン処理
@@ -93,18 +92,25 @@
             signOut(auth);
         });
 
-        // Markdown形式 および通常URLをリンクに変換する関数
+        // リンク解析関数（余分な記号を巻き込まないように修正）
         function parseLinks(text) {
             let safeText = escapeHtml(text);
-            const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/[^\s)]+)\)/g;
+
+            // [表示名](URL) の形式を安全に変換（URL部分の余分な記号や全角文字を除外）
+            const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s<)]+)\)/g;
             safeText = safeText.replace(markdownLinkRegex, function(match, label, url) {
                 return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
             });
+
+            // 通常のURL（https://...）の自動変換
             const urlRegex = /(https?:\/\/[^\s<]+)/g;
             safeText = safeText.replace(urlRegex, function(url) {
                 if (url.includes('href=')) return url;
-                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+                // 末尾の不要な句読点や全角記号をトリミング
+                let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '');
+                return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
             });
+
             return safeText;
         }
 
@@ -113,13 +119,13 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
-        // お知らせを削除する関数（グローバルに公開）
+        // お知らせを削除する関数
         window.deletePost = async function(docId) {
             if (confirm("本当にこのお知らせを削除しますか？")) {
                 try {
                     await deleteDoc(doc(db, "posts", docId));
                     alert("お知らせを削除しました。");
-                    loadPosts(); // 一覧を再読み込み
+                    loadPosts();
                 } catch (e) {
                     alert("削除に失敗しました: " + e.message);
                 }
@@ -143,7 +149,6 @@
                     const data = docSnap.data();
                     const docId = docSnap.id;
 
-                    // 管理者の場合のみ削除ボタンを表示する
                     let deleteButtonHtml = "";
                     if (currentUserIsAdmin) {
                         deleteButtonHtml = `<button class="delete-btn" onclick="deletePost('${docId}')">削除</button>`;
@@ -203,7 +208,7 @@
 
                 if (userDoc.exists() && userDoc.data().role === 'admin') {
                     adminArea.classList.remove('hidden');
-                    currentUserIsAdmin = true; // 管理者フラグをON
+                    currentUserIsAdmin = true;
                 } else {
                     adminArea.classList.add('hidden');
                     currentUserIsAdmin = false;

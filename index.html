@@ -262,24 +262,18 @@
         const statusUpdateStatus = document.getElementById('status-update-status');
 
         let currentUserIsAdmin = false;
-        let currentUserId = null;
-        let currentUserEmail = "";
         let vpnWatchInterval = null;
 
         // 【VPN死活監視】定期的にサーバーと通信を試み、切断されていたら強制的に画面をシャットアウトする
         function startVpnWatchdog() {
             if (vpnWatchInterval) clearInterval(vpnWatchInterval);
             
-            // 4秒おとにサーバーへの疎通（設定データの取得）を強制実行
             vpnWatchInterval = setInterval(async () => {
-                if (!auth.currentUser) return; // ログアウト中なら監視しない
+                if (!auth.currentUser) return;
                 try {
-                    // タイムアウト付きでFirestoreから設定をフェッチ（VPNが切れるとタイムアウトまたは通信エラーになる）
                     await getDoc(doc(db, "settings", "serverStatus"));
                 } catch (error) {
                     console.warn("VPN接続断を検知しました。画面を破棄します。");
-                    
-                    // 1. すべての画面要素を直ちに消去してアクセス不可の真っ白なエラー画面に強制書き換え
                     document.body.innerHTML = `
                         <div style="background: #222; color: #ff5252; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; text-align: center; padding: 20px;">
                             <h1 style="font-size: 28px; margin-bottom: 10px;">⚠️ VPN接続が切断されました</h1>
@@ -290,11 +284,9 @@
                             <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">再読み込み</button>
                         </div>
                     `;
-                    
-                    // 2. 監視タイマーを停止
                     clearInterval(vpnWatchInterval);
                 }
-            }, 4000); // 4秒間隔でチェック
+            }, 4000);
         }
 
         // IPアドレスコピー機能
@@ -313,8 +305,8 @@
         });
 
         // 挨拶メッセージを時刻に合わせて生成する関数
-        function updateGreeting() {
-            if (!currentUserEmail) return;
+        function updateGreeting(email) {
+            if (!email) return;
             const hour = new Date().getHours();
             let greeting = "こんにちは！";
             if (hour >= 5 && hour < 12) {
@@ -324,10 +316,10 @@
             } else {
                 greeting = "こんばんわ！";
             }
-            welcomeMsg.innerText = `${currentUserEmail} さん、${greeting}`;
+            welcomeMsg.innerText = `${email} さん、${greeting}`;
         }
 
-        // リアルタイム時計の更新＆挨拶の定期チェック
+        // リアルタイム時計の更新
         function updateClock() {
             const now = new Date();
             const options = { 
@@ -343,7 +335,9 @@
             if (liveClock) {
                 liveClock.innerText = now.toLocaleDateString('ja-JP', options);
             }
-            updateGreeting();
+            if (auth.currentUser) {
+                updateGreeting(auth.currentUser.email);
+            }
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -394,11 +388,12 @@
             signOut(auth);
         });
 
-        // メモの保存処理
+        // メモの保存処理（auth.currentUser.uid を確実に対象にする）
         saveMemoBtn.addEventListener('click', () => {
-            if (!currentUserId) return;
+            const user = auth.currentUser;
+            if (!user) return;
             const memoText = userMemoArea.value;
-            localStorage.setItem(`minecraft_portal_memo_${currentUserId}`, memoText);
+            localStorage.setItem(`minecraft_portal_memo_${user.uid}`, memoText);
             memoStatus.innerText = "✓ 保存しました！";
             setTimeout(() => { memoStatus.innerText = ""; }, 3000);
         });
@@ -592,17 +587,16 @@
             }
         });
 
-        // ログイン状態の監視 ＆ 権限判定
+        // ログイン状態の監視 ＆ 権限判定・メモ復元
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginSection.classList.add('hidden');
                 portalSection.classList.remove('hidden');
                 
-                currentUserId = user.uid;
-                currentUserEmail = user.email;
-                updateGreeting();
+                updateGreeting(user.email);
 
-                const savedMemo = localStorage.getItem(`minecraft_portal_memo_${currentUserId}`);
+                // ユーザー個別のUIDから確実にローカルストレージのメモをロード
+                const savedMemo = localStorage.getItem(`minecraft_portal_memo_${user.uid}`);
                 userMemoArea.value = savedMemo ? savedMemo : "";
 
                 const userDocRef = doc(db, "users", user.uid);
@@ -620,8 +614,6 @@
 
                 loadPosts();
                 loadSettings();
-
-                // ログイン成功＆VPN接続確認後、死活監視をスタート
                 startVpnWatchdog();
             } else {
                 if (vpnWatchInterval) clearInterval(vpnWatchInterval);
@@ -630,8 +622,6 @@
                 adminArea.classList.add('hidden');
                 adminTabBtn.classList.add('hidden');
                 currentUserIsAdmin = false;
-                currentUserId = null;
-                currentUserEmail = "";
                 userMemoArea.value = "";
             }
         });

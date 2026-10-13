@@ -32,6 +32,30 @@
         .server-ip { background: #333; color: #4CAF50; padding: 10px 15px; font-family: monospace; font-size: 18px; border-radius: 4px; display: inline-block; user-select: all; }
         .copy-btn { background: #2196F3; padding: 10px 16px; font-size: 14px; border-radius: 4px; }
         
+        /* 赤文字の重要注意事項カード */
+        .important-notice-box {
+            background: #ffebee;
+            border: 2px solid #ef5350;
+            border-left: 6px solid #d32f2f;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            text-align: left;
+            color: #c62828;
+            line-height: 1.8;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .important-notice-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #b71c1c;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         /* 管理・投稿エリア */
         .admin-box { background: #ffffe0; padding: 20px; margin-top: 15px; border-radius: 6px; text-align: left; border: 1px dashed #ffd700; }
         .post-item { background: white; padding: 15px; margin: 12px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
@@ -95,6 +119,18 @@
             <!-- ニューステロップ -->
             <div class="marquee-container">
                 <div class="marquee-text" id="marquee-content">📢 マイクラチームポータルへようこそ！最新情報を確認してプレイしてください。</div>
+            </div>
+
+            <!-- 赤文字の重要注意事項メッセージ -->
+            <div class="important-notice-box">
+                <h3>⚠️ 重要なお知らせ</h3>
+                <p style="margin: 0;">
+                    セキュリティ上の兼ね合い、サイトは一定時間経つと自動でログアウトされます。<br>
+                    また、本サイトは VPN に接続しないと閲覧できないように設定してます。<br>
+                    付与したアカウントは絶対に第三者や SNS など外部に漏洩しないようにお願いします。<br>
+                    漏洩等が発生した場合、すべてのシステムを停止します。その場合、統合版をプレイしてください。<br>
+                    ご協力お願いします！
+                </p>
             </div>
 
             <!-- 日時表示カード -->
@@ -556,7 +592,7 @@
             }
         };
 
-        // 一般公開用FAQの読み込み（Firestoreにデータがある場合のみ表示）
+        // 一般公開用FAQの読み込み
         async function loadFaqs() {
             faqListContainer.innerHTML = "読み込み中...";
             try {

@@ -33,7 +33,7 @@
         <div id="admin-area" class="hidden admin-box">
             <h3>[管理者メニュー] お知らせ投稿</h3>
             <input type="text" id="post-title" placeholder="お知らせのタイトル">
-            <textarea id="post-content" placeholder="例: [Googleドライブ](https://...) のように書けます" rows="3"></textarea>
+            <textarea id="post-content" placeholder="例: [ファイル共有](https://...) のように書けます" rows="3"></textarea>
             <button id="post-btn">投稿する</button>
         </div>
 
@@ -92,21 +92,22 @@
             signOut(auth);
         });
 
-        // リンク解析関数（余分な記号を巻き込まないように修正）
+        // リンク解析関数（順序を正しく修正）
         function parseLinks(text) {
             let safeText = escapeHtml(text);
 
-            // [表示名](URL) の形式を安全に変換（URL部分の余分な記号や全角文字を除外）
+            // 1. まず [表示名](URL) の形式を優先して変換
             const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s<)]+)\)/g;
             safeText = safeText.replace(markdownLinkRegex, function(match, label, url) {
-                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+                let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '');
+                return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
             });
 
-            // 通常のURL（https://...）の自動変換
+            // 2. その後、マークダウン化されずに残った通常のURL（https://...）を自動リンク化
             const urlRegex = /(https?:\/\/[^\s<]+)/g;
             safeText = safeText.replace(urlRegex, function(url) {
-                if (url.includes('href=')) return url;
-                // 末尾の不要な句読点や全角記号をトリミング
+                // すでにHTMLタグの一部になっている場合は変換しない
+                if (url.includes('href=') || url.includes('target=')) return url;
                 let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '');
                 return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
             });

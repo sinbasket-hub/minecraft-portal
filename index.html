@@ -28,7 +28,9 @@
 
         /* ダッシュボードカード */
         .card { background: #eef9ff; border-left: 4px solid #2196F3; padding: 20px; margin-bottom: 20px; text-align: left; border-radius: 4px; }
+        .server-ip-box { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
         .server-ip { background: #333; color: #4CAF50; padding: 10px 15px; font-family: monospace; font-size: 18px; border-radius: 4px; display: inline-block; user-select: all; }
+        .copy-btn { background: #2196F3; padding: 10px 16px; font-size: 14px; border-radius: 4px; }
         
         /* 管理・投稿エリア */
         .admin-box { background: #ffffe0; padding: 20px; margin-top: 15px; border-radius: 6px; text-align: left; border: 1px dashed #ffd700; }
@@ -72,7 +74,6 @@
             <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ</button>
             <button class="tab-btn" onclick="switchTab('rules')">📜 ルール</button>
             <button class="tab-btn" onclick="switchTab('memo')">📝 内部メモ</button>
-            <!-- 管理者専用設定タブ（初期状態は非表示） -->
             <button id="admin-tab-btn" class="tab-btn admin-tab hidden" onclick="switchTab('admin-settings')">⚙️ 管理者設定</button>
         </div>
 
@@ -93,8 +94,10 @@
                 <h3>🌍 マイクラサーバー情報</h3>
                 <p><strong>ステータス:</strong> <span style="color: green; font-weight: bold;">● オンライン</span></p>
                 <p><strong>サーバーアドレス (IP):</strong></p>
-                <div class="server-ip">minecraft.example.com</div>
-                <p style="font-size: 13px; color: #666; margin-top: 10px;">Java版 / 統合版対応 (Ver 1.20.4)</p>
+                <div class="server-ip-box">
+                    <div id="server-ip-text" class="server-ip">minecraft.example.com</div>
+                    <button class="copy-btn" id="copy-ip-btn">📋 IPをコピー</button>
+                </div>
             </div>
 
             <div style="text-align: left; margin-top: 25px;">
@@ -237,11 +240,44 @@
         const telopInput = document.getElementById('telop-input');
         const saveTelopBtn = document.getElementById('save-telop-btn');
         const telopStatus = document.getElementById('telop-status');
+        const copyIpBtn = document.getElementById('copy-ip-btn');
+        const serverIpText = document.getElementById('server-ip-text');
 
         let currentUserIsAdmin = false;
         let currentUserId = null;
+        let currentUserEmail = "";
 
-        // リアルタイム時計の更新関数
+        // IPアドレスコピー機能
+        copyIpBtn.addEventListener('click', () => {
+            const ipText = serverIpText.innerText;
+            navigator.clipboard.writeText(ipText).then(() => {
+                copyIpBtn.innerText = "✓ コピー完了！";
+                copyIpBtn.style.background = "#4CAF50";
+                setTimeout(() => {
+                    copyIpBtn.innerText = "📋 IPをコピー";
+                    copyIpBtn.style.background = "#2196F3";
+                }, 2000);
+            }).catch(err => {
+                alert("コピーに失敗しました: " + err);
+            });
+        });
+
+        // 挨拶メッセージを時刻に合わせて生成する関数
+        function updateGreeting() {
+            if (!currentUserEmail) return;
+            const hour = new Date().getHours();
+            let greeting = "こんにちは！";
+            if (hour >= 5 && hour < 12) {
+                greeting = "おはようございます。";
+            } else if (hour >= 12 && hour < 18) {
+                greeting = "こんにちは！";
+            } else {
+                greeting = "こんばんわ！";
+            }
+            welcomeMsg.innerText = `${currentUserEmail} さん、${greeting}`;
+        }
+
+        // リアルタイム時計の更新＆挨拶の定期チェック
         function updateClock() {
             const now = new Date();
             const options = { 
@@ -257,6 +293,8 @@
             if (liveClock) {
                 liveClock.innerText = now.toLocaleDateString('ja-JP', options);
             }
+            // 毎秒時刻が変わるタイミングで挨拶も更新チェック
+            updateGreeting();
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -474,9 +512,10 @@
             if (user) {
                 loginSection.classList.add('hidden');
                 portalSection.classList.remove('hidden');
-                welcomeMsg.innerText = `${user.email} さん、こんにちは！`;
                 
                 currentUserId = user.uid;
+                currentUserEmail = user.email;
+                updateGreeting(); // ログイン時に即時挨拶を反映
 
                 const savedMemo = localStorage.getItem(`minecraft_portal_memo_${currentUserId}`);
                 userMemoArea.value = savedMemo ? savedMemo : "";
@@ -486,11 +525,11 @@
 
                 if (userDoc.exists() && userDoc.data().role === 'admin') {
                     adminArea.classList.remove('hidden');
-                    adminTabBtn.classList.remove('hidden'); // 管理者だけ設定タブを表示
+                    adminTabBtn.classList.remove('hidden');
                     currentUserIsAdmin = true;
                 } else {
                     adminArea.classList.add('hidden');
-                    adminTabBtn.classList.add('hidden'); // 一般メンバーには非表示
+                    adminTabBtn.classList.add('hidden');
                     currentUserIsAdmin = false;
                 }
 
@@ -503,6 +542,7 @@
                 adminTabBtn.classList.add('hidden');
                 currentUserIsAdmin = false;
                 currentUserId = null;
+                currentUserEmail = "";
                 userMemoArea.value = "";
             }
         });

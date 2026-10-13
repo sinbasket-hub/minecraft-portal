@@ -263,6 +263,26 @@
 
         let currentUserIsAdmin = false;
         let vpnWatchInterval = null;
+        let idleLogoutTimer = null;
+
+        // 【10分無操作自動ログアウトの仕組み】
+        const IDLE_TIMEOUT = 10 * 60 * 1000; // 10分 (ミリ秒)
+
+        function resetIdleTimer() {
+            if (!auth.currentUser) return;
+            if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
+            
+            idleLogoutTimer = setTimeout(() => {
+                console.log("10分間操作がなかったため自動ログアウトします。");
+                alert("10分間操作がなかったため、セキュリティ保護のため自動ログアウトしました。");
+                signOut(auth);
+            }, IDLE_TIMEOUT);
+        }
+
+        // ユーザーの動き（マウス、キーボード、クリックなど）を検知してタイマーをリセット
+        ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(event => {
+            window.addEventListener(event, resetIdleTimer);
+        });
 
         // 【VPN死活監視】定期的にサーバーと通信を試み、切断されていたら強制的に画面をシャットアウトする
         function startVpnWatchdog() {
@@ -385,10 +405,11 @@
         // ログアウト処理
         logoutBtn.addEventListener('click', () => {
             if (vpnWatchInterval) clearInterval(vpnWatchInterval);
+            if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
             signOut(auth);
         });
 
-        // メモの保存処理（auth.currentUser.uid を確実に対象にする）
+        // メモの保存処理
         saveMemoBtn.addEventListener('click', () => {
             const user = auth.currentUser;
             if (!user) return;
@@ -587,7 +608,7 @@
             }
         });
 
-        // ログイン状態の監視 ＆ 権限判定・メモ復元
+        // ログイン状態の監視 ＆ 権限判定・メモ復元・自動ログアウトタイマー開始
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginSection.classList.add('hidden');
@@ -595,7 +616,6 @@
                 
                 updateGreeting(user.email);
 
-                // ユーザー個別のUIDから確実にローカルストレージのメモをロード
                 const savedMemo = localStorage.getItem(`minecraft_portal_memo_${user.uid}`);
                 userMemoArea.value = savedMemo ? savedMemo : "";
 
@@ -615,8 +635,10 @@
                 loadPosts();
                 loadSettings();
                 startVpnWatchdog();
+                resetIdleTimer(); // 10分タイマー起動
             } else {
                 if (vpnWatchInterval) clearInterval(vpnWatchInterval);
+                if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
                 loginSection.classList.remove('hidden');
                 portalSection.classList.add('hidden');
                 adminArea.classList.add('hidden');

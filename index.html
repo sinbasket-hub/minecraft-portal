@@ -92,29 +92,40 @@
             signOut(auth);
         });
 
-        // リンク解析関数（より確実に [表示名](URL) を抽出するロジック）
+        // リンクとセキュリティを完全に両立させる変換関数
         function parseLinks(text) {
-            // 1. 一旦セキュリティのためHTMLエスケープ
-            let safeText = escapeHtml(text);
+            if (!text) return "";
 
-            // 2. [表示名](URL) を確実にキャッチする正規表現
-            // URL部分にどんな文字（?=や/など）が入っても閉じカッコ ) までを正しく取得します
-            const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-            safeText = safeText.replace(markdownLinkRegex, function(match, label, url) {
-                // エスケープされてしまったアンパーサンド(&amp;)などを元に戻す
-                let cleanUrl = url.replace(/&amp;/g, '&').trim();
-                return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+            // 1. [表示名](URL) を先に抽出して、安全なHTMLタグに置換する
+            // （エスケープされる前に処理することで記号の崩れを防ぎます）
+            const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+            
+            // 一時的にプレースホルダーに置き換えるか、直接安全な<a>タグにする
+            let processed = text.replace(markdownLinkRegex, function(match, label, url) {
+                const safeLabel = escapeHtml(label);
+                const safeUrl = escapeHtml(url);
+                return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeLabel}</a>`;
             });
 
-            // 3. マークダウン化されずに残った通常のURLをリンクに変換
-            const urlRegex = /(https?:\/\/[^\s<]+)/g;
-            safeText = safeText.replace(urlRegex, function(url) {
-                if (url.includes('href=') || url.includes('target=')) return url;
-                let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '').replace(/&amp;/g, '&');
-                return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
+            // 2. 残りの通常テキスト部分に対してHTMLエスケープを適用する
+            // （ただし、先ほど作った <a> タグ部分は壊さないように分割して処理）
+            let parts = processed.split(/(<a href="[^"]+" target="_blank" rel="noopener noreferrer">.*?<\/a>)/g);
+            
+            parts = parts.map(part => {
+                if (part.startsWith('<a href=')) {
+                    return part; // すでにリンク化した部分はそのまま
+                } else {
+                    // 通常テキストはエスケープしつつ、むき出しのURLがあれば自動リンク化
+                    let escaped = escapeHtml(part);
+                    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+                    return escaped.replace(urlRegex, function(url) {
+                        let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '');
+                        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
+                    });
+                }
             });
 
-            return safeText;
+            return parts.join('');
         }
 
         // HTMLエスケープ用関数

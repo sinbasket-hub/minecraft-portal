@@ -556,7 +556,7 @@
             }
         };
 
-        // 一般公開用FAQの読み込み
+        // 一般公開用FAQの読み込み（Firestoreにデータがある場合のみ表示）
         async function loadFaqs() {
             faqListContainer.innerHTML = "読み込み中...";
             try {
@@ -564,12 +564,7 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    // デフォルトの基本FAQ項目（データがない場合に初期表示）
-                    faqListContainer.innerHTML = `
-                        <div class="faq-item"><div class="faq-q">Q. VPN アカウントを登録した PC 以外で別の PC も登録したいです。</div><p class="faq-a">A. VPN アカウントは1台の PC につき１アカウントとなります。複数登録は行っていません</p></div>
-                        <div class="faq-item"><div class="faq-q">Q. VPN アカウントを登録していない PC からアクセスするとどうなりますか？</div><p class="faq-a">A. 不正アクセス検知となり、VPN からアクセスできません。</p></div>
-                        <div class="faq-item"><div class="faq-q">Q. 外出先から登録した PC を VPN にアクセスしても平気ですか？</div><p class="faq-a">A. いいえ。不正アクセス検知となり、VPN からアクセスできません。</p></div>
-                    `;
+                    faqListContainer.innerHTML = "<p>よくある質問はまだ登録されていません。</p>";
                     return;
                 }
 
@@ -599,7 +594,7 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    adminFaqList.innerHTML = "<p style='font-size: 13px; color: #666;'>追加されたカスタマイズFAQはありません。</p>";
+                    adminFaqList.innerHTML = "<p style='font-size: 13px; color: #666;'>登録されているFAQはありません。上部のフォームから追加してください。</p>";
                     return;
                 }
 

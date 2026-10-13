@@ -264,6 +264,38 @@
         let currentUserIsAdmin = false;
         let currentUserId = null;
         let currentUserEmail = "";
+        let vpnWatchInterval = null;
+
+        // 【VPN死活監視】定期的にサーバーと通信を試み、切断されていたら強制的に画面をシャットアウトする
+        function startVpnWatchdog() {
+            if (vpnWatchInterval) clearInterval(vpnWatchInterval);
+            
+            // 4秒おとにサーバーへの疎通（設定データの取得）を強制実行
+            vpnWatchInterval = setInterval(async () => {
+                if (!auth.currentUser) return; // ログアウト中なら監視しない
+                try {
+                    // タイムアウト付きでFirestoreから設定をフェッチ（VPNが切れるとタイムアウトまたは通信エラーになる）
+                    await getDoc(doc(db, "settings", "serverStatus"));
+                } catch (error) {
+                    console.warn("VPN接続断を検知しました。画面を破棄します。");
+                    
+                    // 1. すべての画面要素を直ちに消去してアクセス不可の真っ白なエラー画面に強制書き換え
+                    document.body.innerHTML = `
+                        <div style="background: #222; color: #ff5252; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; text-align: center; padding: 20px;">
+                            <h1 style="font-size: 28px; margin-bottom: 10px;">⚠️ VPN接続が切断されました</h1>
+                            <p style="color: #fff; font-size: 16px; max-width: 500px; line-height: 1.6;">
+                                セキュリティ保護のため、ポータルサイトへのアクセスが遮断されました。<br>
+                                画面の内容はすべて消去されました。再度ポータルを利用するにはVPNに再接続してください。
+                            </p>
+                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">再読み込み</button>
+                        </div>
+                    `;
+                    
+                    // 2. 監視タイマーを停止
+                    clearInterval(vpnWatchInterval);
+                }
+            }, 4000); // 4秒間隔でチェック
+        }
 
         // IPアドレスコピー機能
         copyIpBtn.addEventListener('click', () => {
@@ -358,6 +390,7 @@
 
         // ログアウト処理
         logoutBtn.addEventListener('click', () => {
+            if (vpnWatchInterval) clearInterval(vpnWatchInterval);
             signOut(auth);
         });
 
@@ -387,7 +420,6 @@
         // サーバー設定（テロップ＆ステータス）をFirestoreから読み込んで反映
         async function loadSettings() {
             try {
-                // テロップ読み込み
                 const telopDoc = await getDoc(doc(db, "settings", "telop"));
                 if (telopDoc.exists()) {
                     const text = telopDoc.data().text;
@@ -395,7 +427,6 @@
                     if (telopInput) telopInput.value = text;
                 }
 
-                // ステータス読み込み
                 const statusDoc = await getDoc(doc(db, "settings", "serverStatus"));
                 if (statusDoc.exists()) {
                     const status = statusDoc.data().status;
@@ -589,7 +620,11 @@
 
                 loadPosts();
                 loadSettings();
+
+                // ログイン成功＆VPN接続確認後、死活監視をスタート
+                startVpnWatchdog();
             } else {
+                if (vpnWatchInterval) clearInterval(vpnWatchInterval);
                 loginSection.classList.remove('hidden');
                 portalSection.classList.add('hidden');
                 adminArea.classList.add('hidden');

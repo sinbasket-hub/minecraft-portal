@@ -12,9 +12,19 @@
         .hidden { display: none; }
         
         /* ナビゲーションタブ */
-        .nav-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .tab-btn { background: #e0e0e0; color: #333; padding: 10px 24px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; font-size: 15px; }
+        .nav-tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn { background: #e0e0e0; color: #333; padding: 10px 20px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; font-size: 15px; }
         .tab-btn.active { background: #4CAF50; color: white; }
+        .tab-btn.admin-tab { background: #ff9800; color: white; }
+        .tab-btn.admin-tab.active { background: #f57c00; }
+
+        /* ニューステロップ（右から左へ流れる） */
+        .marquee-container { background: #222; color: #4CAF50; padding: 10px 15px; border-radius: 6px; overflow: hidden; white-space: nowrap; box-sizing: border-box; margin-bottom: 20px; font-weight: bold; font-size: 16px; border-left: 5px solid #4CAF50; }
+        .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 20s linear infinite; }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
 
         /* ダッシュボードカード */
         .card { background: #eef9ff; border-left: 4px solid #2196F3; padding: 20px; margin-bottom: 20px; text-align: left; border-radius: 4px; }
@@ -62,10 +72,17 @@
             <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ</button>
             <button class="tab-btn" onclick="switchTab('rules')">📜 ルール</button>
             <button class="tab-btn" onclick="switchTab('memo')">📝 内部メモ</button>
+            <!-- 管理者専用設定タブ（初期状態は非表示） -->
+            <button id="admin-tab-btn" class="tab-btn admin-tab hidden" onclick="switchTab('admin-settings')">⚙️ 管理者設定</button>
         </div>
 
         <!-- ================= 1. ホームタブ（ダッシュボード） ================= -->
         <div id="tab-home" class="tab-content">
+            <!-- ニューステロップ -->
+            <div class="marquee-container">
+                <div class="marquee-text" id="marquee-content">📢 マイクラチームポータルへようこそ！最新情報を確認してプレイしてください。</div>
+            </div>
+
             <!-- 日時表示カード -->
             <div class="card" style="border-left-color: #4CAF50; background: #f1f8e9;">
                 <h3 style="margin-top: 0; color: #2e7d32;">🕒 現在の日時</h3>
@@ -169,13 +186,24 @@
                 <span id="memo-status" style="color: #4CAF50; font-weight: bold; font-size: 14px;"></span>
             </div>
         </div>
+
+        <!-- ================= 5. 管理者専用設定タブ ================= -->
+        <div id="tab-admin-settings" class="tab-content hidden" style="text-align: left;">
+            <div style="background: #fff8e1; border: 1px solid #ffe0b2; padding: 20px; border-radius: 6px;">
+                <h3 style="color: #f57c00; margin-top: 0;">⚙️ 管理者専用設定：ニューステロップ編集</h3>
+                <p style="font-size: 14px; color: #555;">ホーム画面の上部に流れるテロップの文章をブラウザから自由に変更できます。</p>
+                <input type="text" id="telop-input" placeholder="テロップに表示するメッセージを入力" style="width: 100%;">
+                <button id="save-telop-btn" style="background: #ff9800; margin-top: 10px;">💾 テロップを更新する</button>
+                <span id="telop-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Firebaseのスクリプト読み込みと処理 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDgkLmZc-mgdVzPQpyreco57OeqkdU8cG8",
@@ -196,6 +224,7 @@
         const loginSection = document.getElementById('login-section');
         const portalSection = document.getElementById('portal-section');
         const adminArea = document.getElementById('admin-area');
+        const adminTabBtn = document.getElementById('admin-tab-btn');
         const welcomeMsg = document.getElementById('welcome-msg');
         const postBtn = document.getElementById('post-btn');
         const homePostsContainer = document.getElementById('home-posts-container');
@@ -204,6 +233,10 @@
         const saveMemoBtn = document.getElementById('save-memo-btn');
         const memoStatus = document.getElementById('memo-status');
         const liveClock = document.getElementById('live-clock');
+        const marqueeContent = document.getElementById('marquee-content');
+        const telopInput = document.getElementById('telop-input');
+        const saveTelopBtn = document.getElementById('save-telop-btn');
+        const telopStatus = document.getElementById('telop-status');
 
         let currentUserIsAdmin = false;
         let currentUserId = null;
@@ -226,7 +259,7 @@
             }
         }
         setInterval(updateClock, 1000);
-        updateClock(); // 即時実行
+        updateClock();
 
         // タブ切り替え関数をグローバルに公開
         window.switchTab = function(tabName) {
@@ -234,6 +267,8 @@
             document.getElementById('tab-news').classList.add('hidden');
             document.getElementById('tab-rules').classList.add('hidden');
             document.getElementById('tab-memo').classList.add('hidden');
+            const adminSettingsTab = document.getElementById('tab-admin-settings');
+            if (adminSettingsTab) adminSettingsTab.classList.add('hidden');
             
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
@@ -249,6 +284,9 @@
                 event.target.classList.add('active');
             } else if (tabName === 'memo') {
                 document.getElementById('tab-memo').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'admin-settings') {
+                if (adminSettingsTab) adminSettingsTab.classList.remove('hidden');
                 event.target.classList.add('active');
             }
         };
@@ -274,9 +312,39 @@
             const memoText = userMemoArea.value;
             localStorage.setItem(`minecraft_portal_memo_${currentUserId}`, memoText);
             memoStatus.innerText = "✓ 保存しました！";
-            setTimeout(() => {
-                memoStatus.innerText = "";
-            }, 3000);
+            setTimeout(() => { memoStatus.innerText = ""; }, 3000);
+        });
+
+        // ニューステロップをFirestoreから読み込んで反映
+        async function loadTelop() {
+            try {
+                const telopDoc = await getDoc(doc(db, "settings", "telop"));
+                if (telopDoc.exists()) {
+                    const text = telopDoc.data().text;
+                    marqueeContent.innerText = text;
+                    if (telopInput) telopInput.value = text;
+                }
+            } catch (e) {
+                console.error("テロップ読み込みエラー: ", e);
+            }
+        }
+
+        // 管理者によるテロップ更新処理
+        saveTelopBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const newText = telopInput.value.trim();
+            if (!newText) {
+                alert("テロップの文章を入力してください。");
+                return;
+            }
+            try {
+                await setDoc(doc(db, "settings", "telop"), { text: newText });
+                marqueeContent.innerText = newText;
+                telopStatus.innerText = "✓ テロップを更新しました！";
+                setTimeout(() => { telopStatus.innerText = ""; }, 3000);
+            } catch (e) {
+                alert("更新に失敗しました: " + e.message);
+            }
         });
 
         // リンク解析関数
@@ -418,17 +486,21 @@
 
                 if (userDoc.exists() && userDoc.data().role === 'admin') {
                     adminArea.classList.remove('hidden');
+                    adminTabBtn.classList.remove('hidden'); // 管理者だけ設定タブを表示
                     currentUserIsAdmin = true;
                 } else {
                     adminArea.classList.add('hidden');
+                    adminTabBtn.classList.add('hidden'); // 一般メンバーには非表示
                     currentUserIsAdmin = false;
                 }
 
                 loadPosts();
+                loadTelop();
             } else {
                 loginSection.classList.remove('hidden');
                 portalSection.classList.add('hidden');
                 adminArea.classList.add('hidden');
+                adminTabBtn.classList.add('hidden');
                 currentUserIsAdmin = false;
                 currentUserId = null;
                 userMemoArea.value = "";

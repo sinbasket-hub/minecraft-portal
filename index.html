@@ -150,10 +150,10 @@
                 </div>
             </div>
 
-            <!-- 動画配置カード -->
+            <!-- 広くした動画配置カード -->
             <div class="card" style="border-left-color: #ff9800; background: #fff8e1; text-align: center;">
                 <h3 style="margin-top: 0; color: #e65100;">🎬 チュートリアル動画</h3>
-                <video controls style="width: 100%; max-height: 400px; border-radius: 4px; background: #000;">
+                <video controls preload="metadata" style="width: 100%; max-height: 550px; border-radius: 4px; background: #000;">
                     <source src="sample.mp4" type="video/mp4">
                     お使いのブラウザは動画タグをサポートしていません。
                 </video>
@@ -410,7 +410,6 @@
             }, 4000);
         }
 
-        // 確実なIPアドレスコピー機能（フォールバック対応）
         copyIpBtn.addEventListener('click', () => {
             const ipText = serverIpText.innerText;
             

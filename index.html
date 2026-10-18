@@ -2,195 +2,1018 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>安全な配信のための運用チェックリスト</title>
+    <title>マイクラチーム ポータル</title>
     <style>
-        body {
-            font-family: sans-serif;
-            background-color: #f4f6f8;
-            color: #333;
+        body { font-family: sans-serif; text-align: center; margin: 0; background: #f4f4f9; padding-top: 30px; }
+        .box { background: white; max-width: 100%; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        input, textarea, select { display: block; width: 95%; margin: 10px auto; padding: 12px; font-family: sans-serif; font-size: 14px; box-sizing: border-box; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        button:hover { opacity: 0.9; }
+        .hidden { display: none; }
+        
+        /* ナビゲーションタブ */
+        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn { background: #e0e0e0; color: #333; padding: 10px 16px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; font-size: 14px; }
+        .tab-btn.active { background: #4CAF50; color: white; }
+        .tab-btn.admin-tab { background: #ff9800; color: white; }
+        .tab-btn.admin-tab.active { background: #f57c00; }
+
+        /* ニューステロップ（右から左へ流れる） */
+        .marquee-container { background: #222; color: #4CAF50; padding: 10px 15px; border-radius: 6px; overflow: hidden; white-space: nowrap; box-sizing: border-box; margin-bottom: 20px; font-weight: bold; font-size: 16px; border-left: 5px solid #4CAF50; }
+        .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 20s linear infinite; }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        /* ダッシュボードカード */
+        .card { background: #eef9ff; border-left: 4px solid #2196F3; padding: 20px; margin-bottom: 20px; text-align: left; border-radius: 4px; }
+        .server-ip-box { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+        .server-ip { background: #333; color: #4CAF50; padding: 10px 15px; font-family: monospace; font-size: 18px; border-radius: 4px; display: inline-block; user-select: all; }
+        .copy-btn { background: #2196F3; padding: 10px 16px; font-size: 14px; border-radius: 4px; }
+        
+        /* 赤文字の重要注意事項カード */
+        .important-notice-box {
+            background: #ffebee;
+            border: 2px solid #ef5350;
+            border-left: 6px solid #d32f2f;
             padding: 20px;
-        }
-        .checklist-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            border: 2px solid #2e7d32;
-        }
-        .checklist-header {
-            background-color: #2e7d32;
-            color: #ffffff;
-            padding: 16px 20px;
-            font-size: 1.25rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .nav-text {
-            background-color: #1b5e20;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-        .checklist-body {
-            padding: 20px;
-        }
-        .checklist-description {
-            font-size: 0.95rem;
-            color: #555;
-            background-color: #e8f5e9;
-            padding: 12px 16px;
-            border-radius: 6px;
             margin-bottom: 20px;
-            border-left: 4px solid #2e7d32;
-            line-height: 1.5;
-        }
-        .checklist-section-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-        }
-        .checklist-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 16px;
-            padding: 12px;
-            background-color: #f9f9f9;
             border-radius: 6px;
-            transition: background-color 0.2s;
+            text-align: left;
+            color: #c62828;
+            line-height: 1.8;
+            font-size: 15px;
+            font-weight: bold;
         }
-        .checklist-item:hover {
-            background-color: #f1f8e9;
-        }
-        .checklist-item input[type="checkbox"] {
-            margin-right: 12px;
-            margin-top: 3px;
-            transform: scale(1.2);
-            cursor: pointer;
-        }
-        .checklist-item label {
-            cursor: pointer;
-            line-height: 1.5;
-        }
-        .checklist-footer {
-            margin-top: 24px;
+        .important-notice-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #b71c1c;
+            font-size: 18px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 8px;
         }
-        .success-message {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #2e7d32;
-            display: none;
-        }
-        .success-message.show {
-            display: inline-block;
-        }
-        .close-btn {
-            background-color: #ccc;
-            color: #666;
-            border: none;
-            padding: 10px 24px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: not-allowed;
-            transition: background-color 0.2s, color 0.2s;
-            margin-left: auto;
-        }
-        .close-btn.active {
-            background-color: #2e7d32;
-            color: #ffffff;
-            cursor: pointer;
-        }
-        .close-btn.active:hover {
-            background-color: #1b5e20;
-        }
+
+        /* 管理・投稿エリア */
+        .admin-box { background: #ffffe0; padding: 20px; margin-top: 15px; border-radius: 6px; text-align: left; border: 1px dashed #ffd700; }
+        .post-item { background: white; padding: 15px; margin: 12px 0; border-left: 4px solid #4CAF50; text-align: left; box-shadow: 0 1px 3px rgba(0,0,0,0.1); word-break: break-all; }
+        .post-item a { color: #1e88e5; text-decoration: underline; font-weight: bold; }
+        .delete-btn { background: #f44336; padding: 6px 12px; font-size: 12px; margin-top: 10px; }
+        .like-btn { background: #e0e0e0; color: #333; padding: 6px 14px; font-size: 13px; border-radius: 20px; margin-top: 8px; border: none; cursor: pointer; font-weight: bold; }
+        .like-btn.liked { background: #ff4081; color: white; }
+
+        /* ルール＆FAQページのスタイル */
+        .page-content { text-align: left; line-height: 1.8; color: #333; font-size: 15px; }
+        .content-section { background: #fff; border: 1px solid #e0e0e0; border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 25px; border-radius: 6px; }
+        .content-section h3 { color: #d32f2f; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 18px; }
+        .page-content ul { padding-left: 25px; }
+        .page-content li { margin-bottom: 8px; }
+        .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 15px; text-align: center; }
+
+        /* FAQアコーディオン/カードのスタイル */
+        .faq-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 15px; text-align: left; }
+        .faq-q { font-weight: bold; color: #1976D2; margin-bottom: 8px; font-size: 16px; }
+        .faq-a { color: #333; margin: 0; white-space: pre-wrap; line-height: 1.6; }
+
+        /* 内部メモのスタイル */
+        .memo-content { text-align: left; }
+        .memo-textarea { width: 100%; height: 350px; padding: 15px; font-size: 15px; line-height: 1.6; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; }
+        
+        /* テーブル共通 */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: white; }
+        .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+        .admin-table th { background: #f5f5f5; }
     </style>
 </head>
 <body>
 
-<div class="checklist-container" id="checklistApp">
-    <div class="checklist-header">
-        <span class="nav-text">Navigation Navi</span>
-        <span>安全な配信のための運用チェックリスト</span>
+    <!-- ログイン前画面 -->
+    <div id="login-section" class="box" style="max-width: 450px;">
+        <h2>マイクラポータル ログイン</h2>
+        <input type="email" id="email" placeholder="メールアドレス">
+        <input type="password" id="password" placeholder="パスワード">
+        <button id="login-btn" style="width: 95%; margin-top: 15px;">ログイン</button>
     </div>
-    <div class="checklist-body">
-        <div class="checklist-description">
-            各4つの項目にレ点をすると「閉じる」ボタンが押せるようになります。一つずつ確認してチェックしてください。
+
+    <!-- ログイン後メインポータル画面 -->
+    <div id="portal-section" class="box hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 25px;">
+            <h2 id="welcome-msg" style="margin: 0; font-size: 20px;">ようこそ！</h2>
+            <button id="logout-btn" style="background: #f44336; padding: 8px 16px; font-size: 14px;">ログアウト</button>
         </div>
 
-        <div class="checklist-section-title">
-            ■ 配信前チェックリスト（開始前に必ず指差し確認）[cite: 1]
-        </div>
-        
-        <div class="checklist-item">
-            <input type="checkbox" class="check-item" id="check1">
-            <label for="check1">1. 配信ソフト（OBS等）のソース設定が「ゲームキャプチャ」のみになっているか。[cite: 1]</label>
-        </div>
-        
-        <div class="checklist-item">
-            <input type="checkbox" class="check-item" id="check2">
-            <label for="check2">2. デスクトップ画面やブラウザ（Google Drive、ポータルサイト）が映り込む設定になっていないか。[cite: 1]</label>
-        </div>
-        
-        <div class="checklist-item">
-            <input type="checkbox" class="check-item" id="check3">
-            <label for="check3">3. Discordの通知音やポップアップ通知がオフ（配信モード）になっているか。[cite: 1]</label>
-        </div>
-        
-        <div class="checklist-item">
-            <input type="checkbox" class="check-item" id="check4">
-            <label for="check4">4. マイクラ内のサーバーIPアドレスが画面に表示されていないか。[cite: 1]</label>
+        <!-- 画面切り替えタブ -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('home')">🏠 ホーム</button>
+            <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ</button>
+            <button class="tab-btn" onclick="switchTab('rules')">📜 ルール</button>
+            <button class="tab-btn" onclick="switchTab('faq')">❓ FAQ</button>
+            <button class="tab-btn" onclick="switchTab('memo')">📝 内部メモ</button>
+            <button id="admin-tab-btn" class="tab-btn admin-tab hidden" onclick="switchTab('admin-settings')">⚙️ 管理者設定</button>
         </div>
 
-        <div class="checklist-footer">
-            <div id="successMsg" class="success-message">合格〇</div>
-            <button type="button" id="closeBtn" class="close-btn" disabled>閉じる</button>
+        <!-- ================= 1. ホームタブ（ダッシュボード） ================= -->
+        <div id="tab-home" class="tab-content">
+            <!-- ニューステロップ -->
+            <div class="marquee-container">
+                <div class="marquee-text" id="marquee-content">📢 マイクラチームポータルへようこそ！最新情報を確認してプレイしてください。</div>
+            </div>
+
+            <!-- 赤文字の重要注意事項メッセージ -->
+            <div class="important-notice-box">
+                <h3>⚠️ 重要なお知らせ</h3>
+                <p style="margin: 0;">
+                    セキュリティ上の兼ね合い、サイトは一定時間経つと自動でログアウトされます。<br>
+                    また、本サイトは VPN に接続しないと閲覧できないように設定してます。<br>
+                    付与したアカウントは絶対に第三者や SNS など外部に漏洩しないようにお願いします。<br>
+                    漏洩等が発生した場合、すべてのシステムを停止します。その場合、統合版をプレイしてください。<br>
+                    ご協力お願いします！
+                </p>
+            </div>
+
+            <!-- 日時表示カード -->
+            <div class="card" style="border-left-color: #4CAF50; background: #f1f8e9;">
+                <h3 style="margin-top: 0; color: #2e7d32;">🕒 現在の日時</h3>
+                <p id="live-clock" style="font-size: 18px; font-weight: bold; margin: 0; color: #333;">読み込み中...</p>
+            </div>
+
+            <!-- サーバー情報カード -->
+            <div class="card">
+                <h3>🌍 マイクラサーバー情報</h3>
+                <p><strong>ステータス:</strong> <span id="server-status-display" style="font-weight: bold; color: green;">● オンライン</span></p>
+                <p><strong>サーバーアドレス (IP):</strong></p>
+                <div class="server-ip-box">
+                    <div id="server-ip-text" class="server-ip">minecraft.example.com</div>
+                    <button class="copy-btn" id="copy-ip-btn">📋 IPをコピー</button>
+                </div>
+            </div>
+
+            <!-- 広くした動画配置カード -->
+            <div class="card" style="border-left-color: #ff9800; background: #fff8e1; text-align: center;">
+                <h3 style="margin-top: 0; color: #e65100;">🎬 チュートリアル動画</h3>
+                <video controls preload="metadata" style="width: 75%; max-height: 700px; border-radius: 4px; background: #000;">
+    <source src="movie/sample.mp4" type="video/mp4">
+    お使いのブラウザは動画タグをサポートしていません。
+</video>
+            </div>
+
+            <div style="text-align: left; margin-top: 25px;">
+                <h3>📌 最新のお知らせ（抜粋）</h3>
+                <div id="home-posts-container">読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- ================= 2. お知らせ掲示板タブ ================= -->
+        <div id="tab-news" class="tab-content hidden">
+            <!-- 管理者メニュー（お知らせ投稿フォーム） -->
+            <div id="admin-area" class="hidden admin-box">
+                <h3>[管理者メニュー] お知らせ投稿</h3>
+                <input type="text" id="post-title" placeholder="お知らせのタイトル">
+                <textarea id="post-content" placeholder="例: [ファイル共有](https://...) のように書けます" rows="4"></textarea>
+                <button id="post-btn">投稿する</button>
+            </div>
+
+            <!-- お知らせ一覧エリア -->
+            <div style="margin-top: 25px; text-align: left;">
+                <h3>📢 チームお知らせ一覧</h3>
+                <div id="news-posts-container">読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- ================= 3. ルールタブ ================= -->
+        <div id="tab-rules" class="tab-content hidden page-content">
+            <h2>📜 サーバー利用ルール</h2>
+            
+            <!-- ルール① -->
+            <div class="content-section">
+                <h3>ルール①</h3>
+                <p>Java 版マイクラをマルチプレイをする場合、VPN へ接続をしていただきます。<br>
+                セキュリティについては強く設定していますので、安心してください！<br>
+                マルチプレイをするには PC が必要となります。</p>
+                
+                <p><strong>◆接続手順◆</strong></p>
+                <ul>
+                    <li><strong>①</strong> SoftEther VPN Client をインストールします。（別でマニュアル作成済）</li>
+                    <li><strong>②</strong> SoftEther VPN のアカウントをお伝えします。</li>
+                    <li><strong>③</strong> Java 版マイクラの IP アドレスを共有します。</li>
+                </ul>
+                <p style="color: #d32f2f; font-weight: bold;">※ VPN アカウントは絶対に SNS や第三者へ共有しないでください。</p>
+            </div>
+
+            <!-- ルール② -->
+            <div class="content-section">
+                <h3>ルール②</h3>
+                <p>VPN アカウントを正しく使ってほしいので注意項目を以下より確認してください。<br>
+                SoftEther VPN では基本「ユーザー名」と「PW」でアクセスすることができます。<br>
+                ですが特殊な設定にしています。接続先証明書を登録するため、クライアント (ユーザー側)の IP アドレスを管理者側で登録をかけています。<br>
+                そのため、別の PC から VPN へアクセスしようとしても接続拒否されます。登録をかけた PC じゃないとアクセスはできません。</p>
+                
+                <p>ログは常に AI を使って分析しているので、万が一、遊び感覚で別の PC からアカウントを入力してアクセスしようとすると不正アクセスと検知され、アクセス不可となるように設定しています。初期登録したら VPN 設定はいじらないでください！</p>
+
+                <p>特に注意してほしいのが、ノート PC やタブレット PC で Java 版マイクラをしているユーザーさんです。<br>
+                友人や親戚の家、フリーWi-Fi(カフェ、ホテル、携帯キャリア店など)へネット接続をして VPN にログインしてしまうと、<br>
+                IPアドレスが変わり、不正アクセス検知となり、アクセスすることができないので注意してください！<br>
+                外出先からマイクラをプレイしたい場合は、統合版をプレイしてください。</p>
+
+                <p style="font-size: 14px; color: #555;">
+                    ※ あくまで自宅に光回線、コンセント型ルーターに契約しいる方が対象です。<br>
+                      ポケット Wi-Fi やスマホのテザリングは NG となります。
+                </p>
+
+                <div class="warning-box">
+                    ⚠️複数回不正アクセス検知すると VPN アカウントは 一時停止となります⚠️
+                </div>
+            </div>
+
+            <!-- ルール③ -->
+            <div class="content-section">
+                <h3>ルール③</h3>
+                <p>VPN アカウントとポータルサイトのアカウントも付与します。<br>
+                ポータルサイトは VPN に接続しないと閲覧できないようになっています。<br>
+                Java 版マイクラをプレイする前に必ずポータルサイトのお知らせ欄を確認してください。<br>
+                メンテナンス中で起動しなかったり、PC 再起動で一時的にオフラインになっていることがあります。<br>
+                その都度、お知らせへ投稿していくので確認お願いします！</p>
+            </div>
+        </div>
+
+        <!-- ================= 4. FAQタブ ================= -->
+        <div id="tab-faq" class="tab-content hidden page-content">
+            <h2>❓ よくある質問 (FAQ)</h2>
+            <div id="faq-list-container">読み込み中...</div>
+        </div>
+
+        <!-- ================= 5. 内部メモタブ ================= -->
+        <div id="tab-memo" class="tab-content hidden memo-content">
+            <h3>📝 個人用内部メモ</h3>
+            <p style="color: #666; font-size: 14px;">このメモは現在ログインしているアカウント（ブラウザ）ごとに保存されます。自分用の座標の控えや、やりたい事リストなど自由にお使いください。</p>
+            <textarea id="user-memo-area" class="memo-textarea" placeholder="ここに自由なメモを入力してください（自動で保存されます）..."></textarea>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <button id="save-memo-btn" style="background: #2196F3;">💾 メモを保存する</button>
+                <span id="memo-status" style="color: #4CAF50; font-weight: bold; font-size: 14px;"></span>
+            </div>
+        </div>
+
+        <!-- ================= 6. 管理者専用設定タブ ================= -->
+        <div id="tab-admin-settings" class="tab-content hidden" style="text-align: left;">
+            <!-- サーバーIPアドレス編集セクション -->
+            <div style="background: #e1f5fe; border: 1px solid #b3e5fc; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #0288d1; margin-top: 0;">🌐 マイクラサーバーIPアドレス編集</h3>
+                <p style="font-size: 14px; color: #555;">ホーム画面に表示されるマイクラサーバーのIPアドレス（アドレス）を変更します。</p>
+                <input type="text" id="server-ip-input" placeholder="例: minecraft.example.com または 123.45.67.89" style="width: 100%;">
+                <button id="save-server-ip-btn" style="background: #03a9f4; margin-top: 10px;">💾 IPアドレスを更新する</button>
+                <span id="server-ip-update-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
+            </div>
+
+            <!-- FAQ追加・管理セクション -->
+            <div style="background: #e8f5e9; border: 1px solid #c8e6c9; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #2e7d32; margin-top: 0;">❓ FAQ（よくある質問）の追加・管理</h3>
+                <p style="font-size: 14px; color: #555;">「FAQ」タブに表示される質問と回答をブラウザ上から追加できます。</p>
+                <input type="text" id="faq-q-input" placeholder="質問文（例: Q. 〜〜〜ですか？）">
+                <textarea id="faq-a-input" placeholder="回答文（例: A. 〜〜〜です。）" rows="3"></textarea>
+                <button id="add-faq-btn" style="background: #4CAF50;">➕ 新しいFAQを追加する</button>
+                <div id="admin-faq-list" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- テロップ編集セクション -->
+            <div style="background: #fff8e1; border: 1px solid #ffe0b2; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #f57c00; margin-top: 0;">⚙️ ニューステロップ編集</h3>
+                <p style="font-size: 14px; color: #555;">ホーム画面の上部に流れるテロップの文章をブラウザから自由に変更できます。</p>
+                <input type="text" id="telop-input" placeholder="テロップに表示するメッセージを入力" style="width: 100%;">
+                <button id="save-telop-btn" style="background: #ff9800; margin-top: 10px;">💾 テロップを更新する</button>
+                <span id="telop-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
+            </div>
+
+            <!-- ステータス変更セクション -->
+            <div style="background: #eef9ff; border: 1px solid #b3e5fc; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #0288d1; margin-top: 0;">🌍 サーバーテータス変更</h3>
+                <p style="font-size: 14px; color: #555;">ホーム画面に表示されるマイクラサーバーの稼働状態を変更します。</p>
+                <select id="status-select">
+                    <option value="online">● オンライン</option>
+                    <option value="offline">● オフライン</option>
+                    <option value="maintenance">● メンテナンス中</option>
+                </select>
+                <button id="save-status-btn" style="background: #2196F3; margin-top: 10px;">💾 ステータスを更新する</button>
+                <span id="status-update-status" style="color: #4CAF50; font-weight: bold; font-size: 14px; margin-left: 10px;"></span>
+            </div>
+
+            <!-- アカウント管理セクション -->
+            <div style="background: #f3e5f5; border: 1px solid #ce93d8; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #8e24aa; margin-top: 0;">👥 ユーザーアカウント管理（追加・変更・削除）</h3>
+                <p style="font-size: 14px; color: #555;">システムに登録されているユーザーの権限（ロール）を変更したり、Firestore上のメタデータを管理できます。</p>
+                <div id="admin-users-container">読み込み中...</div>
+            </div>
+
+            <!-- いいね確認セクション -->
+            <div style="background: #fce4ec; border: 1px solid #f8bbd0; padding: 20px; border-radius: 6px;">
+                <h3 style="color: #c2185b; margin-top: 0;">❤️ いいね確認リーダー</h3>
+                <p style="font-size: 14px; color: #555;">メンバーがどの記事に「いいね！」を押したのか一覧で確認できます。</p>
+                <div id="admin-likes-container">読み込み中...</div>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const checkboxes = document.querySelectorAll('.check-item');
-    const closeBtn = document.getElementById('closeBtn');
-    const successMsg = document.getElementById('successMsg');
+    <!-- Firebaseのスクリプト読み込みと処理 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, orderBy, getDocs, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    function updateButtonState() {
-        // すべてのチェックボックスがチェックされているか確認
-        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgkLmZc-mgdVzPQpyreco57OeqkdU8cG8",
+            authDomain: "minecraft-portal-f3409.firebaseapp.com",
+            projectId: "minecraft-portal-f3409",
+            storageBucket: "minecraft-portal-f3409.firebasestorage.app",
+            messagingSenderId: "298086078718",
+            appId: "1:298086078718:web:7a1e0da291ad60d4392daf",
+            measurementId: "G-SBJ7GE98DB"
+        };
 
-        if (allChecked) {
-            closeBtn.removeAttribute('disabled');
-            closeBtn.classList.add('active');
-            successMsg.classList.add('show');
-        } else {
-            closeBtn.setAttribute('disabled', 'true');
-            closeBtn.classList.remove('active');
-            successMsg.classList.remove('show');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginSection = document.getElementById('login-section');
+        const portalSection = document.getElementById('portal-section');
+        const adminArea = document.getElementById('admin-area');
+        const adminTabBtn = document.getElementById('admin-tab-btn');
+        const welcomeMsg = document.getElementById('welcome-msg');
+        const postBtn = document.getElementById('post-btn');
+        const homePostsContainer = document.getElementById('home-posts-container');
+        const newsPostsContainer = document.getElementById('news-posts-container');
+        const userMemoArea = document.getElementById('user-memo-area');
+        const saveMemoBtn = document.getElementById('save-memo-btn');
+        const memoStatus = document.getElementById('memo-status');
+        const liveClock = document.getElementById('live-clock');
+        const marqueeContent = document.getElementById('marquee-content');
+        const telopInput = document.getElementById('telop-input');
+        const saveTelopBtn = document.getElementById('save-telop-btn');
+        const telopStatus = document.getElementById('telop-status');
+        const copyIpBtn = document.getElementById('copy-ip-btn');
+        const serverIpText = document.getElementById('server-ip-text');
+        const serverStatusDisplay = document.getElementById('server-status-display');
+        const statusSelect = document.getElementById('status-select');
+        const saveStatusBtn = document.getElementById('save-status-btn');
+        const statusUpdateStatus = document.getElementById('status-update-status');
+        const adminLikesContainer = document.getElementById('admin-likes-container');
+        const adminUsersContainer = document.getElementById('admin-users-container');
+        const faqListContainer = document.getElementById('faq-list-container');
+        const faqQInput = document.getElementById('faq-q-input');
+        const faqAInput = document.getElementById('faq-a-input');
+        const addFaqBtn = document.getElementById('add-faq-btn');
+        const adminFaqList = document.getElementById('admin-faq-list');
+        const serverIpInput = document.getElementById('server-ip-input');
+        const saveServerIpBtn = document.getElementById('save-server-ip-btn');
+        const serverIpUpdateStatus = document.getElementById('server-ip-update-status');
+
+        let currentUserIsAdmin = false;
+        let vpnWatchInterval = null;
+        let idleLogoutTimer = null;
+
+        const IDLE_TIMEOUT = 10 * 60 * 1000;
+
+        function resetIdleTimer() {
+            if (!auth.currentUser) return;
+            if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
+            idleLogoutTimer = setTimeout(() => {
+                alert("10分間操作がなかったため、セキュリティ保護のため自動ログアウトしました。");
+                signOut(auth);
+            }, IDLE_TIMEOUT);
         }
-    }
 
-    // 各チェックボックスの変化を監視
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateButtonState);
-    });
+        ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(event => {
+            window.addEventListener(event, resetIdleTimer);
+        });
 
-    // 閉じるボタンが押された時の処理
-    closeBtn.addEventListener('click', () => {
-        if (!closeBtn.disabled) {
-            window.close();
+        function startVpnWatchdog() {
+            if (vpnWatchInterval) clearInterval(vpnWatchInterval);
+            vpnWatchInterval = setInterval(async () => {
+                if (!auth.currentUser) return;
+                try {
+                    await getDoc(doc(db, "settings", "serverStatus"));
+                } catch (error) {
+                    document.body.innerHTML = `
+                        <div style="background: #222; color: #ff5252; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; text-align: center; padding: 20px;">
+                            <h1 style="font-size: 28px; margin-bottom: 10px;">⚠️ VPN接続が切断されました</h1>
+                            <p style="color: #fff; font-size: 16px; max-width: 500px; line-height: 1.6;">
+                                セキュリティ保護のため、ポータルサイトへのアクセスが遮断されました。<br>
+                                画面の内容はすべて消去されました。再度ポータルを利用するにはVPNに再接続してください。
+                            </p>
+                            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">再読み込み</button>
+                        </div>
+                    `;
+                    clearInterval(vpnWatchInterval);
+                }
+            }, 4000);
         }
-    });
-</script>
 
+        copyIpBtn.addEventListener('click', () => {
+            const ipText = serverIpText.innerText;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(ipText).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopyText(ipText);
+                });
+            } else {
+                fallbackCopyText(ipText);
+            }
+        });
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess();
+                } else {
+                    alert("コピーに失敗しました。手動でコピーしてください。");
+                }
+            } catch (err) {
+                alert("コピーエラー: " + err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess() {
+            copyIpBtn.innerText = "✓ コピー完了！";
+            copyIpBtn.style.background = "#4CAF50";
+            setTimeout(() => {
+                copyIpBtn.innerText = "📋 IPをコピー";
+                copyIpBtn.style.background = "#2196F3";
+            }, 2000);
+        }
+
+        function updateGreeting(email) {
+            if (!email) return;
+            const hour = new Date().getHours();
+            let greeting = "こんにちは！";
+            if (hour >= 5 && hour < 12) {
+                greeting = "おはようございます。";
+            } else if (hour >= 12 && hour < 18) {
+                greeting = "こんにちは！";
+            } else {
+                greeting = "こんばんわ！";
+            }
+            welcomeMsg.innerText = `${email} さん、${greeting}`;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            if (liveClock) {
+                liveClock.innerText = now.toLocaleDateString('ja-JP', options);
+            }
+            if (auth.currentUser) {
+                updateGreeting(auth.currentUser.email);
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        window.switchTab = function(tabName) {
+            document.getElementById('tab-home').classList.add('hidden');
+            document.getElementById('tab-news').classList.add('hidden');
+            document.getElementById('tab-rules').classList.add('hidden');
+            document.getElementById('tab-faq').classList.add('hidden');
+            document.getElementById('tab-memo').classList.add('hidden');
+            const adminSettingsTab = document.getElementById('tab-admin-settings');
+            if (adminSettingsTab) adminSettingsTab.classList.add('hidden');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            if (tabName === 'home') {
+                document.getElementById('tab-home').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'news') {
+                document.getElementById('tab-news').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'rules') {
+                document.getElementById('tab-rules').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'faq') {
+                document.getElementById('tab-faq').classList.remove('hidden');
+                event.target.classList.add('active');
+                loadFaqs();
+            } else if (tabName === 'memo') {
+                document.getElementById('tab-memo').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'admin-settings') {
+                if (adminSettingsTab) adminSettingsTab.classList.remove('hidden');
+                event.target.classList.add('active');
+                loadAdminLikes();
+                loadAdminUsers();
+                loadAdminFaqs();
+            }
+        };
+
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch((error) => {
+                    alert('ログイン失敗: ' + error.message);
+                });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            if (vpnWatchInterval) clearInterval(vpnWatchInterval);
+            if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
+            signOut(auth);
+        });
+
+        saveMemoBtn.addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            const memoText = userMemoArea.value;
+            localStorage.setItem(`minecraft_portal_memo_${user.uid}`, memoText);
+            memoStatus.innerText = "✓ 保存しました！";
+            setTimeout(() => { memoStatus.innerText = ""; }, 3000);
+        });
+
+        function applyStatusDisplay(statusValue) {
+            if (statusValue === 'online') {
+                serverStatusDisplay.innerText = "● オンライン";
+                serverStatusDisplay.style.color = "green";
+            } else if (statusValue === 'offline') {
+                serverStatusDisplay.innerText = "● オフライン";
+                serverStatusDisplay.style.color = "red";
+            } else if (statusValue === 'maintenance') {
+                serverStatusDisplay.innerText = "● メンテナンス中";
+                serverStatusDisplay.style.color = "orange";
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const telopDoc = await getDoc(doc(db, "settings", "telop"));
+                if (telopDoc.exists()) {
+                    const text = telopDoc.data().text;
+                    marqueeContent.innerText = text;
+                    if (telopInput) telopInput.value = text;
+                }
+
+                const statusDoc = await getDoc(doc(db, "settings", "serverStatus"));
+                if (statusDoc.exists()) {
+                    const status = statusDoc.data().status;
+                    applyStatusDisplay(status);
+                    if (statusSelect) statusSelect.value = status;
+                }
+
+                const ipDoc = await getDoc(doc(db, "settings", "serverIp"));
+                if (ipDoc.exists()) {
+                    const ip = ipDoc.data().ip;
+                    serverIpText.innerText = ip;
+                    if (serverIpInput) serverIpInput.value = ip;
+                }
+            } catch (e) {
+                console.error("設定読み込みエラー: ", e);
+            }
+        }
+
+        saveTelopBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const newText = telopInput.value.trim();
+            if (!newText) {
+                alert("テロップの文章を入力してください。");
+                return;
+            }
+            try {
+                await setDoc(doc(db, "settings", "telop"), { text: newText });
+                marqueeContent.innerText = newText;
+                telopStatus.innerText = "✓ テロップを更新しました！";
+                setTimeout(() => { telopStatus.innerText = ""; }, 3000);
+            } catch (e) {
+                alert("更新に失敗しました: " + e.message);
+            }
+        });
+
+        saveStatusBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const newStatus = statusSelect.value;
+            try {
+                await setDoc(doc(db, "settings", "serverStatus"), { status: newStatus });
+                applyStatusDisplay(newStatus);
+                statusUpdateStatus.innerText = "✓ ステータスを更新しました！";
+                setTimeout(() => { statusUpdateStatus.innerText = ""; }, 3000);
+            } catch (e) {
+                alert("ステータス更新に失敗しました: " + e.message);
+            }
+        });
+
+        saveServerIpBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const newIp = serverIpInput.value.trim();
+            if (!newIp) {
+                alert("サーバーIPアドレスを入力してください。");
+                return;
+            }
+            try {
+                await setDoc(doc(db, "settings", "serverIp"), { ip: newIp });
+                serverIpText.innerText = newIp;
+                serverIpUpdateStatus.innerText = "✓ IPアドレスを更新しました！";
+                setTimeout(() => { serverIpUpdateStatus.innerText = ""; }, 3000);
+            } catch (e) {
+                alert("IPアドレス更新に失敗しました: " + e.message);
+            }
+        });
+
+        // ================= FAQ追加・読み込み・削除のロジック =================
+        addFaqBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const question = faqQInput.value.trim();
+            const answer = faqAInput.value.trim();
+
+            if (!question || !answer) {
+                alert("質問と回答の両方を入力してください。");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "faqs"), {
+                    question: question,
+                    answer: answer,
+                    createdAt: new Date()
+                });
+                alert("FAQを追加しました！");
+                faqQInput.value = "";
+                faqAInput.value = "";
+                loadAdminFaqs();
+                loadFaqs();
+            } catch (e) {
+                alert("FAQ追加エラー: " + e.message);
+            }
+        });
+
+        window.deleteFaq = async function(docId) {
+            if (!currentUserIsAdmin) return;
+            if (confirm("このFAQ項目を削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "faqs", docId));
+                    alert("FAQを削除しました。");
+                    loadAdminFaqs();
+                    loadFaqs();
+                } catch (e) {
+                    alert("削除エラー: " + e.message);
+                }
+            }
+        };
+
+        async function loadFaqs() {
+            faqListContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "faqs"), orderBy("createdAt", "asc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    faqListContainer.innerHTML = "<p>よくある質問はまだ登録されていません。</p>";
+                    return;
+                }
+
+                let html = "";
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    html += `
+                        <div class="faq-item">
+                            <div class="faq-q">${escapeHtml(data.question)}</div>
+                            <p class="faq-a">${escapeHtml(data.answer)}</p>
+                        </div>
+                    `;
+                });
+                faqListContainer.innerHTML = html;
+            } catch (e) {
+                console.error("FAQ読み込みエラー: ", e);
+                faqListContainer.innerHTML = "<p>FAQの読み込みに失敗しました。</p>";
+            }
+        }
+
+        async function loadAdminFaqs() {
+            if (!currentUserIsAdmin) return;
+            adminFaqList.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "faqs"), orderBy("createdAt", "asc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    adminFaqList.innerHTML = "<p style='font-size: 13px; color: #666;'>登録されているFAQはありません。上部のフォームから追加してください。</p>";
+                    return;
+                }
+
+                let html = `<table class="admin-table"><tr><th>質問 (Question)</th><th>回答 (Answer)</th><th>操作</th></tr>`;
+                querySnapshot.forEach((docSnap) => {
+                    const docId = docSnap.id;
+                    const data = docSnap.data();
+                    html += `<tr>
+                        <td><strong>${escapeHtml(data.question)}</strong></td>
+                        <td>${escapeHtml(data.answer)}</td>
+                        <td><button class="delete-btn" style="padding: 4px 8px; font-size: 11px;" onclick="deleteFaq('${docId}')">削除</button></td>
+                    </tr>`;
+                });
+                html += `</table>`;
+                adminFaqList.innerHTML = html;
+            } catch (e) {
+                console.error("管理者FAQ読み込みエラー: ", e);
+                adminFaqList.innerHTML = "<p>読み込み失敗</p>";
+            }
+        }
+
+        window.updateUserRole = async function(uid, newRole) {
+            if (!currentUserIsAdmin) return;
+            try {
+                await updateDoc(doc(db, "users", uid), { role: newRole });
+                alert("権限を更新しました。");
+                loadAdminUsers();
+            } catch (e) {
+                alert("更新失敗: " + e.message);
+            }
+        };
+
+        window.deleteUserRecord = async function(uid) {
+            if (!currentUserIsAdmin) return;
+            if (confirm("本当にこのユーザーの管理者/権限データを削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "users", uid));
+                    alert("ユーザーデータを削除しました。");
+                    loadAdminUsers();
+                } catch (e) {
+                    alert("削除失敗: " + e.message);
+                }
+            }
+        };
+
+        async function loadAdminUsers() {
+            if (!currentUserIsAdmin) return;
+            adminUsersContainer.innerHTML = "読み込み中...";
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                if (querySnapshot.empty) {
+                    adminUsersContainer.innerHTML = "<p>登録されているユーザー情報がありません。</p>";
+                    return;
+                }
+
+                let html = `<table class="admin-table"><tr><th>ユーザー UID / 識別子</th><th>権限 (Role)</th><th>操作</th></tr>`;
+                querySnapshot.forEach((docSnap) => {
+                    const uid = docSnap.id;
+                    const data = docSnap.data();
+                    const role = data.role || 'user';
+
+                    html += `<tr>
+                        <td><code>${uid}</code></td>
+                        <td>
+                            <select onchange="updateUserRole('${uid}', this.value)">
+                                <option value="user" ${role === 'user' ? 'selected' : ''}>一般 (user)</option>
+                                <option value="admin" ${role === 'admin' ? 'selected' : ''}>管理者 (admin)</option>
+                            </select>
+                        </td>
+                        <td><button class="delete-btn" style="padding: 4px 8px; font-size: 11px;" onclick="deleteUserRecord('${uid}')">削除</button></td>
+                    </tr>`;
+                });
+                html += `</table><p style="font-size: 12px; color: #666; margin-top: 8px;">※ 新規アカウントはFirebase Console等で作成後、UIDがここに紐づきます。</p>`;
+                adminUsersContainer.innerHTML = html;
+            } catch (e) {
+                console.error("ユーザー一覧読み込みエラー: ", e);
+                adminUsersContainer.innerHTML = "<p>ユーザー情報の読み込みに失敗しました。</p>";
+            }
+        }
+
+        function parseLinks(text) {
+            if (!text) return "";
+            const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+            let processed = text.replace(markdownLinkRegex, function(match, label, url) {
+                const safeLabel = escapeHtml(label);
+                const safeUrl = escapeHtml(url);
+                return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeLabel}</a>`;
+            });
+
+            let parts = processed.split(/(<a href="[^"]+" target="_blank" rel="noopener noreferrer">.*?<\/a>)/g);
+            parts = parts.map(part => {
+                if (part.startsWith('<a href=')) {
+                    return part;
+                } else {
+                    let escaped = escapeHtml(part);
+                    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+                    return escaped.replace(urlRegex, function(url) {
+                        let cleanUrl = url.replace(/[.,;!?）〉〕］｝』”’]+$/, '');
+                        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
+                    });
+                }
+            });
+            return parts.join('');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        window.deletePost = async function(docId) {
+            if (confirm("本当にこのお知らせを削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "posts", docId));
+                    alert("お知らせを削除しました。");
+                    loadPosts();
+                } catch (e) {
+                    alert("削除に失敗しました: " + e.message);
+                }
+            }
+        };
+
+        window.toggleLike = async function(docId) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const postRef = doc(db, "posts", docId);
+            const postSnap = await getDoc(postRef);
+            if (!postSnap.exists()) return;
+
+            const data = postSnap.data();
+            const likes = data.likes || [];
+            const userEmail = user.email;
+
+            try {
+                if (likes.includes(userEmail)) {
+                    await updateDoc(postRef, { likes: arrayRemove(userEmail) });
+                } else {
+                    await updateDoc(postRef, { likes: arrayUnion(userEmail) });
+                }
+                loadPosts();
+            } catch (e) {
+                alert("いいね処理に失敗しました: " + e.message);
+            }
+        };
+
+        async function loadAdminLikes() {
+            if (!currentUserIsAdmin) return;
+            adminLikesContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    adminLikesContainer.innerHTML = "<p>お知らせはまだありません。</p>";
+                    return;
+                }
+
+                let html = `<table class="admin-table"><tr><th>お知らせタイトル</th><th>いいね数</th><th>いいねしたユーザー (メールアドレス)</th></tr>`;
+                
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const title = escapeHtml(data.title || '無題');
+                    const likes = data.likes || [];
+                    const likesCount = likes.length;
+                    const likesUsersStr = likes.length > 0 ? likes.map(email => escapeHtml(email)).join(', ') : '<span style="color: gray;">なし</span>';
+
+                    html += `<tr>
+                        <td><strong>${title}</strong></td>
+                        <td style="text-align: center;">❤️ ${likesCount}</td>
+                        <td>${likesUsersStr}</td>
+                    </tr>`;
+                });
+
+                html += `</table>`;
+                adminLikesContainer.innerHTML = html;
+            } catch (e) {
+                console.error("いいね一覧読み込みエラー: ", e);
+                adminLikesContainer.innerHTML = "<p>読み込みに失敗しました。</p>";
+            }
+        }
+
+        async function loadPosts() {
+            homePostsContainer.innerHTML = "読み込み中...";
+            newsPostsContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    homePostsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
+                    newsPostsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
+                    return;
+                }
+
+                let newsHtml = "";
+                let homeHtml = "";
+                let count = 0;
+                const currentUserEmail = auth.currentUser ? auth.currentUser.email : "";
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const docId = docSnap.id;
+                    const likes = data.likes || [];
+                    const hasLiked = likes.includes(currentUserEmail);
+                    const likeBtnClass = hasLiked ? "like-btn liked" : "like-btn";
+                    const likeBtnText = hasLiked ? `❤️ いいね済み (${likes.length})` : `🤍 いいね (${likes.length})`;
+
+                    let deleteButtonHtml = "";
+                    if (currentUserIsAdmin) {
+                        deleteButtonHtml = `<button class="delete-btn" onclick="deletePost('${docId}')">削除</button>`;
+                    }
+
+                    const itemHtml = `
+                        <div class="post-item">
+                            <h4 style="margin: 0 0 8px 0; font-size: 16px;">${escapeHtml(data.title)}</h4>
+                            <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${parseLinks(data.content)}</p>
+                            <small style="color: gray; display: inline-block; margin-top: 5px;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
+                            <div>
+                                <button class="${likeBtnClass}" onclick="toggleLike('${docId}')">${likeBtnText}</button>
+                                ${deleteButtonHtml}
+                            </div>
+                        </div>
+                    `;
+
+                    newsHtml += itemHtml;
+                    if (count < 3) {
+                        homeHtml += itemHtml;
+                        count++;
+                    }
+                });
+
+                newsPostsContainer.innerHTML = newsHtml;
+                homePostsContainer.innerHTML = homeHtml;
+            } catch (e) {
+                console.error("お知らせ読み込みエラー: ", e);
+                homePostsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
+                newsPostsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
+            }
+        }
+
+        postBtn.addEventListener('click', async () => {
+            const title = document.getElementById('post-title').value.trim();
+            const content = document.getElementById('post-content').value.trim();
+
+            if (!title || !content) {
+                alert('タイトルと内容を入力してください。');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "posts"), {
+                    title: title,
+                    content: content,
+                    author: auth.currentUser.email,
+                    createdAt: new Date(),
+                    likes: []
+                });
+                alert('お知らせを投稿しました！');
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-content').value = '';
+                loadPosts();
+            } catch (e) {
+                alert('投稿に失敗しました: ' + e.message);
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loginSection.classList.add('hidden');
+                portalSection.classList.remove('hidden');
+                
+                updateGreeting(user.email);
+
+                const savedMemo = localStorage.getItem(`minecraft_portal_memo_${user.uid}`);
+                userMemoArea.value = savedMemo ? savedMemo : "";
+
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists() && userDoc.data().role === 'admin') {
+                    adminArea.classList.remove('hidden');
+                    adminTabBtn.classList.remove('hidden');
+                    currentUserIsAdmin = true;
+                } else {
+                    adminArea.classList.add('hidden');
+                    adminTabBtn.classList.add('hidden');
+                    currentUserIsAdmin = false;
+                }
+
+                loadPosts();
+                loadSettings();
+                loadFaqs();
+                startVpnWatchdog();
+                resetIdleTimer();
+            } else {
+                if (vpnWatchInterval) clearInterval(vpnWatchInterval);
+                if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
+                loginSection.classList.remove('hidden');
+                portalSection.classList.add('hidden');
+                adminArea.classList.add('hidden');
+                adminTabBtn.classList.add('hidden');
+                currentUserIsAdmin = false;
+                userMemoArea.value = "";
+            }
+        });
+    </script>
 </body>
 </html>

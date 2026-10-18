@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全な配信のための運用チェックリスト</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            padding: 20px;
+        }
+        .checklist-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 2px solid #2e7d32;
+        }
+        .checklist-header {
+            background-color: #2e7d32;
+            color: #ffffff;
+            padding: 16px 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-text {
+            background-color: #1b5e20;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        .checklist-body {
+            padding: 20px;
+        }
+        .checklist-description {
+            font-size: 0.95rem;
+            color: #555;
+            background-color: #e8f5e9;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+            line-height: 1.5;
+        }
+        .checklist-section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .checklist-item:hover {
+            background-color: #f1f8e9;
+        }
+        .checklist-item input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 3px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        .checklist-item label {
+            cursor: pointer;
+            line-height: 1.5;
+        }
+        .checklist-footer {
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .success-message {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2e7d32;
+            display: none;
+        }
+        .success-message.show {
+            display: inline-block;
+        }
+        .close-btn {
+            background-color: #ccc;
+            color: #666;
+            border: none;
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: not-allowed;
+            transition: background-color 0.2s, color 0.2s;
+            margin-left: auto;
+        }
+        .close-btn.active {
+            background-color: #2e7d32;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        .close-btn.active:hover {
+            background-color: #1b5e20;
+        }
+    </style>
+</head>
+<body>
+
+<div class="checklist-container" id="checklistApp">
+    <div class="checklist-header">
+        <span class="nav-text">Navigation Navi</span>
+        <span>安全な配信のための運用チェックリスト</span>
+    </div>
+    <div class="checklist-body">
+        <div class="checklist-description">
+            各4つの項目にレ点をすると「閉じる」ボタンが押せるようになります。一つずつ確認してチェックしてください。
+        </div>
+
+        <div class="checklist-section-title">
+            ■ 配信前チェックリスト（開始前に必ず指差し確認）[cite: 1]
+        </div>
+        
+        <div class="checklist-item">
+            <input type="checkbox" class="check-item" id="check1">
+            <label for="check1">1. 配信ソフト（OBS等）のソース設定が「ゲームキャプチャ」のみになっているか。[cite: 1]</label>
+        </div>
+        
+        <div class="checklist-item">
+            <input type="checkbox" class="check-item" id="check2">
+            <label for="check2">2. デスクトップ画面やブラウザ（Google Drive、ポータルサイト）が映り込む設定になっていないか。[cite: 1]</label>
+        </div>
+        
+        <div class="checklist-item">
+            <input type="checkbox" class="check-item" id="check3">
+            <label for="check3">3. Discordの通知音やポップアップ通知がオフ（配信モード）になっているか。[cite: 1]</label>
+        </div>
+        
+        <div class="checklist-item">
+            <input type="checkbox" class="check-item" id="check4">
+            <label for="check4">4. マイクラ内のサーバーIPアドレスが画面に表示されていないか。[cite: 1]</label>
+        </div>
+
+        <div class="checklist-footer">
+            <div id="successMsg" class="success-message">合格〇</div>
+            <button type="button" id="closeBtn" class="close-btn" disabled>閉じる</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('.check-item');
+    const closeBtn = document.getElementById('closeBtn');
+    const successMsg = document.getElementById('successMsg');
+
+    function updateButtonState() {
+        // すべてのチェックボックスがチェックされているか確認
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+        if (allChecked) {
+            closeBtn.removeAttribute('disabled');
+            closeBtn.classList.add('active');
+            successMsg.classList.add('show');
+        } else {
+            closeBtn.setAttribute('disabled', 'true');
+            closeBtn.classList.remove('active');
+            successMsg.classList.remove('show');
+        }
+    }
+
+    // 各チェックボックスの変化を監視
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateButtonState);
+    });
+
+    // 閉じるボタンが押された時の処理
+    closeBtn.addEventListener('click', () => {
+        if (!closeBtn.disabled) {
+            window.close();
+        }
+    });
+</script>
+
+</body>
+</html>

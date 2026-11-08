@@ -72,10 +72,13 @@
         .page-content li { margin-bottom: 8px; }
         .warning-box { background: #ffebee; border: 1px solid #ffcdd2; padding: 12px; border-radius: 4px; color: #c62828; font-weight: bold; margin-top: 15px; text-align: center; }
 
-        /* FAQアコーディオン/カードのスタイル */
+        /* FAQ/メンバーグリッドのスタイル */
         .faq-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin-bottom: 15px; text-align: left; }
         .faq-q { font-weight: bold; color: #1976D2; margin-bottom: 8px; font-size: 16px; }
         .faq-a { color: #333; margin: 0; white-space: pre-wrap; line-height: 1.6; }
+
+        .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
+        .member-card { background: #fff; border: 1px solid #e0e0e0; border-top: 4px solid #4CAF50; border-radius: 6px; padding: 15px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         /* 内部メモのスタイル */
         .memo-content { text-align: left; }
@@ -107,6 +110,7 @@
         <!-- 画面切り替えタブ -->
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('home')">🏠 ホーム</button>
+            <button class="tab-btn" onclick="switchTab('members')">👥 メンバー</button>
             <button class="tab-btn" onclick="switchTab('news')">📢 お知らせ</button>
             <button class="tab-btn" onclick="switchTab('rules')">📜 ルール</button>
             <button class="tab-btn" onclick="switchTab('faq')">❓ FAQ</button>
@@ -150,19 +154,26 @@
                 </div>
             </div>
 
-            <!-- 広くした動画配置カード -->
+            <!-- 動画配置カード -->
             <div class="card" style="border-left-color: #ff9800; background: #fff8e1; text-align: center;">
                 <h3 style="margin-top: 0; color: #e65100;">🎬 チュートリアル動画</h3>
                 <video controls preload="metadata" style="width: 75%; max-height: 700px; border-radius: 4px; background: #000;">
-    <source src="movie/sample.mp4" type="video/mp4">
-    お使いのブラウザは動画タグをサポートしていません。
-</video>
+                    <source src="movie/sample.mp4" type="video/mp4">
+                    お使いのブラウザは動画タグをサポートしていません。
+                </video>
             </div>
 
+            <!-- イベント情報 -->
             <div style="text-align: left; margin-top: 25px;">
-                <h3>📌 最新のお知らせ（抜粋）</h3>
-                <div id="home-posts-container">読み込み中...</div>
+                <h3>📅 イベント情報</h3>
+                <div id="home-events-container">読み込み中...</div>
             </div>
+        </div>
+
+        <!-- ================= メンバータブ ================= -->
+        <div id="tab-members" class="tab-content hidden page-content">
+            <h2>👥 チームメンバーリスト</h2>
+            <div id="members-list-container">読み込み中...</div>
         </div>
 
         <!-- ================= 2. お知らせ掲示板タブ ================= -->
@@ -185,14 +196,11 @@
         <!-- ================= 3. ルールタブ ================= -->
         <div id="tab-rules" class="tab-content hidden page-content">
             <h2>📜 サーバー利用ルール</h2>
-            
-            <!-- ルール① -->
             <div class="content-section">
                 <h3>ルール①</h3>
                 <p>Java 版マイクラをマルチプレイをする場合、VPN へ接続をしていただきます。<br>
                 セキュリティについては強く設定していますので、安心してください！<br>
                 マルチプレイをするには PC が必要となります。</p>
-                
                 <p><strong>◆接続手順◆</strong></p>
                 <ul>
                     <li><strong>①</strong> SoftEther VPN Client をインストールします。（別でマニュアル作成済）</li>
@@ -201,33 +209,25 @@
                 </ul>
                 <p style="color: #d32f2f; font-weight: bold;">※ VPN アカウントは絶対に SNS や第三者へ共有しないでください。</p>
             </div>
-
-            <!-- ルール② -->
             <div class="content-section">
                 <h3>ルール②</h3>
                 <p>VPN アカウントを正しく使ってほしいので注意項目を以下より確認してください。<br>
                 SoftEther VPN では基本「ユーザー名」と「PW」でアクセスすることができます。<br>
                 ですが特殊な設定にしています。接続先証明書を登録するため、クライアント (ユーザー側)の IP アドレスを管理者側で登録をかけています。<br>
                 そのため、別の PC から VPN へアクセスしようとしても接続拒否されます。登録をかけた PC じゃないとアクセスはできません。</p>
-                
                 <p>ログは常に AI を使って分析しているので、万が一、遊び感覚で別の PC からアカウントを入力してアクセスしようとすると不正アクセスと検知され、アクセス不可となるように設定しています。初期登録したら VPN 設定はいじらないでください！</p>
-
                 <p>特に注意してほしいのが、ノート PC やタブレット PC で Java 版マイクラをしているユーザーさんです。<br>
                 友人や親戚の家、フリーWi-Fi(カフェ、ホテル、携帯キャリア店など)へネット接続をして VPN にログインしてしまうと、<br>
                 IPアドレスが変わり、不正アクセス検知となり、アクセスすることができないので注意してください！<br>
                 外出先からマイクラをプレイしたい場合は、統合版をプレイしてください。</p>
-
                 <p style="font-size: 14px; color: #555;">
                     ※ あくまで自宅に光回線、コンセント型ルーターに契約しいる方が対象です。<br>
                       ポケット Wi-Fi やスマホのテザリングは NG となります。
                 </p>
-
                 <div class="warning-box">
                     ⚠️複数回不正アクセス検知すると VPN アカウントは 一時停止となります⚠️
                 </div>
             </div>
-
-            <!-- ルール③ -->
             <div class="content-section">
                 <h3>ルール③</h3>
                 <p>VPN アカウントとポータルサイトのアカウントも付与します。<br>
@@ -257,6 +257,29 @@
 
         <!-- ================= 6. 管理者専用設定タブ ================= -->
         <div id="tab-admin-settings" class="tab-content hidden" style="text-align: left;">
+
+            <!-- イベント追加・管理セクション -->
+            <div style="background: #e3f2fd; border: 1px solid #90caf9; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #1565c0; margin-top: 0;">📅 イベント情報の追加・編集</h3>
+                <p style="font-size: 14px; color: #555;">ホーム画面に表示されるイベント情報を管理できます。</p>
+                <input type="text" id="event-title-input" placeholder="イベントタイトル (例: 夏の建築コンテスト)">
+                <input type="text" id="event-date-input" placeholder="開催日時 (例: 2026年8月15日 20:00〜)">
+                <textarea id="event-desc-input" placeholder="イベントの詳細や参加方法など" rows="3"></textarea>
+                <button id="add-event-btn" style="background: #1976D2;">➕ イベントを追加する</button>
+                <div id="admin-events-list" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- メンバー登録・管理セクション -->
+            <div style="background: #e8f5e9; border: 1px solid #a5d6a7; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #2e7d32; margin-top: 0;">👥 メンバーリストの追加・編集</h3>
+                <p style="font-size: 14px; color: #555;">「メンバー」タブに表示されるチームメンバーの情報を登録・管理できます。</p>
+                <input type="text" id="member-name-input" placeholder="MC ID / 表示名 (例: Ukashin)">
+                <input type="text" id="member-role-input" placeholder="役割・称号 (例: サーバー管理者, 建築担当)">
+                <textarea id="member-note-input" placeholder="一言コメントや得意分野など" rows="2"></textarea>
+                <button id="add-member-btn" style="background: #388E3C;">➕ メンバーを追加する</button>
+                <div id="admin-members-list" style="margin-top: 15px;"></div>
+            </div>
+
             <!-- サーバーIPアドレス編集セクション -->
             <div style="background: #e1f5fe; border: 1px solid #b3e5fc; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
                 <h3 style="color: #0288d1; margin-top: 0;">🌐 マイクラサーバーIPアドレス編集</h3>
@@ -267,12 +290,12 @@
             </div>
 
             <!-- FAQ追加・管理セクション -->
-            <div style="background: #e8f5e9; border: 1px solid #c8e6c9; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
-                <h3 style="color: #2e7d32; margin-top: 0;">❓ FAQ（よくある質問）の追加・管理</h3>
+            <div style="background: #fff3e0; border: 1px solid #ffe0b2; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                <h3 style="color: #e65100; margin-top: 0;">❓ FAQ（よくある質問）の追加・管理</h3>
                 <p style="font-size: 14px; color: #555;">「FAQ」タブに表示される質問と回答をブラウザ上から追加できます。</p>
                 <input type="text" id="faq-q-input" placeholder="質問文（例: Q. 〜〜〜ですか？）">
                 <textarea id="faq-a-input" placeholder="回答文（例: A. 〜〜〜です。）" rows="3"></textarea>
-                <button id="add-faq-btn" style="background: #4CAF50;">➕ 新しいFAQを追加する</button>
+                <button id="add-faq-btn" style="background: #ef6c00;">➕ 新しいFAQを追加する</button>
                 <div id="admin-faq-list" style="margin-top: 15px;"></div>
             </div>
 
@@ -287,7 +310,7 @@
 
             <!-- ステータス変更セクション -->
             <div style="background: #eef9ff; border: 1px solid #b3e5fc; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
-                <h3 style="color: #0288d1; margin-top: 0;">🌍 サーバーテータス変更</h3>
+                <h3 style="color: #0288d1; margin-top: 0;">🌍 サーバーステータス変更</h3>
                 <p style="font-size: 14px; color: #555;">ホーム画面に表示されるマイクラサーバーの稼働状態を変更します。</p>
                 <select id="status-select">
                     <option value="online">● オンライン</option>
@@ -300,8 +323,8 @@
 
             <!-- アカウント管理セクション -->
             <div style="background: #f3e5f5; border: 1px solid #ce93d8; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
-                <h3 style="color: #8e24aa; margin-top: 0;">👥 ユーザーアカウント管理（追加・変更・削除）</h3>
-                <p style="font-size: 14px; color: #555;">システムに登録されているユーザーの権限（ロール）を変更したり、Firestore上のメタデータを管理できます。</p>
+                <h3 style="color: #8e24aa; margin-top: 0;">👥 ユーザーアカウント権限管理</h3>
+                <p style="font-size: 14px; color: #555;">システムに登録されているユーザーの権限（ロール）を変更できます。</p>
                 <div id="admin-users-container">読み込み中...</div>
             </div>
 
@@ -342,8 +365,9 @@
         const adminTabBtn = document.getElementById('admin-tab-btn');
         const welcomeMsg = document.getElementById('welcome-msg');
         const postBtn = document.getElementById('post-btn');
-        const homePostsContainer = document.getElementById('home-posts-container');
+        const homeEventsContainer = document.getElementById('home-events-container');
         const newsPostsContainer = document.getElementById('news-posts-container');
+        const membersListContainer = document.getElementById('members-list-container');
         const userMemoArea = document.getElementById('user-memo-area');
         const saveMemoBtn = document.getElementById('save-memo-btn');
         const memoStatus = document.getElementById('memo-status');
@@ -368,6 +392,20 @@
         const serverIpInput = document.getElementById('server-ip-input');
         const saveServerIpBtn = document.getElementById('save-server-ip-btn');
         const serverIpUpdateStatus = document.getElementById('server-ip-update-status');
+
+        // イベント用DOM
+        const eventTitleInput = document.getElementById('event-title-input');
+        const eventDateInput = document.getElementById('event-date-input');
+        const eventDescInput = document.getElementById('event-desc-input');
+        const addEventBtn = document.getElementById('add-event-btn');
+        const adminEventsList = document.getElementById('admin-events-list');
+
+        // メンバー用DOM
+        const memberNameInput = document.getElementById('member-name-input');
+        const memberRoleInput = document.getElementById('member-role-input');
+        const memberNoteInput = document.getElementById('member-note-input');
+        const addMemberBtn = document.getElementById('add-member-btn');
+        const adminMembersList = document.getElementById('admin-members-list');
 
         let currentUserIsAdmin = false;
         let vpnWatchInterval = null;
@@ -412,7 +450,6 @@
 
         copyIpBtn.addEventListener('click', () => {
             const ipText = serverIpText.innerText;
-            
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(ipText).then(() => {
                     showCopySuccess();
@@ -436,11 +473,8 @@
             textArea.select();
             try {
                 const successful = document.execCommand('copy');
-                if (successful) {
-                    showCopySuccess();
-                } else {
-                    alert("コピーに失敗しました。手動でコピーしてください。");
-                }
+                if (successful) showCopySuccess();
+                else alert("コピーに失敗しました。手動でコピーしてください。");
             } catch (err) {
                 alert("コピーエラー: " + err);
             }
@@ -456,18 +490,25 @@
             }, 2000);
         }
 
+        // 天気マークを挨拶の末尾に配置（例: ○○ さん、こんにちは！🌤️）
         function updateGreeting(email) {
             if (!email) return;
             const hour = new Date().getHours();
             let greeting = "こんにちは！";
+            let weatherIcon = "🌤️"; // デフォルト（昼）
+
             if (hour >= 5 && hour < 12) {
-                greeting = "おはようございます。";
+                greeting = "おはようございます！";
+                weatherIcon = "☀️"; // 朝
             } else if (hour >= 12 && hour < 18) {
                 greeting = "こんにちは！";
+                weatherIcon = "🌤️"; // 昼
             } else {
                 greeting = "こんばんわ！";
+                weatherIcon = "🌙"; // 夜
             }
-            welcomeMsg.innerText = `${email} さん、${greeting}`;
+            const username = email.split('@')[0];
+            welcomeMsg.innerText = `${username} さん、${greeting}${weatherIcon}`;
         }
 
         function updateClock() {
@@ -485,6 +526,7 @@
 
         window.switchTab = function(tabName) {
             document.getElementById('tab-home').classList.add('hidden');
+            document.getElementById('tab-members').classList.add('hidden');
             document.getElementById('tab-news').classList.add('hidden');
             document.getElementById('tab-rules').classList.add('hidden');
             document.getElementById('tab-faq').classList.add('hidden');
@@ -498,6 +540,11 @@
             if (tabName === 'home') {
                 document.getElementById('tab-home').classList.remove('hidden');
                 event.target.classList.add('active');
+                loadEvents();
+            } else if (tabName === 'members') {
+                document.getElementById('tab-members').classList.remove('hidden');
+                event.target.classList.add('active');
+                loadMembers();
             } else if (tabName === 'news') {
                 document.getElementById('tab-news').classList.remove('hidden');
                 event.target.classList.add('active');
@@ -514,6 +561,8 @@
             } else if (tabName === 'admin-settings') {
                 if (adminSettingsTab) adminSettingsTab.classList.remove('hidden');
                 event.target.classList.add('active');
+                loadAdminEvents();
+                loadAdminMembers();
                 loadAdminLikes();
                 loadAdminUsers();
                 loadAdminFaqs();
@@ -631,7 +680,216 @@
             }
         });
 
-        // ================= FAQ追加・読み込み・削除のロジック =================
+        // ================= イベント情報（管理者編集対応） =================
+        addEventBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const title = eventTitleInput.value.trim();
+            const date = eventDateInput.value.trim();
+            const desc = eventDescInput.value.trim();
+
+            if (!title || !date) {
+                alert("イベントタイトルと日時を入力してください。");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "events"), {
+                    title: title,
+                    date: date,
+                    description: desc,
+                    createdAt: new Date()
+                });
+                alert("イベント情報を追加しました！");
+                eventTitleInput.value = "";
+                eventDateInput.value = "";
+                eventDescInput.value = "";
+                loadEvents();
+                loadAdminEvents();
+            } catch (e) {
+                alert("イベント追加エラー: " + e.message);
+            }
+        });
+
+        window.deleteEvent = async function(docId) {
+            if (!currentUserIsAdmin) return;
+            if (confirm("このイベント情報を削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "events", docId));
+                    alert("イベント情報を削除しました。");
+                    loadEvents();
+                    loadAdminEvents();
+                } catch (e) {
+                    alert("削除エラー: " + e.message);
+                }
+            }
+        };
+
+        async function loadEvents() {
+            homeEventsContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "events"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    homeEventsContainer.innerHTML = "<p>予定されているイベントはありません。</p>";
+                    return;
+                }
+
+                let html = "";
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    html += `
+                        <div class="post-item" style="border-left-color: #2196F3;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 16px; color: #1976D2;">🎉 ${escapeHtml(data.title)}</h4>
+                            <p style="margin: 0 0 5px 0; font-weight: bold; font-size: 14px; color: #555;">🗓️ 開催日時: ${escapeHtml(data.date)}</p>
+                            <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${parseLinks(data.description)}</p>
+                        </div>
+                    `;
+                });
+                homeEventsContainer.innerHTML = html;
+            } catch (e) {
+                console.error("イベント読み込みエラー: ", e);
+                homeEventsContainer.innerHTML = "<p>イベント情報の読み込みに失敗しました。</p>";
+            }
+        }
+
+        async function loadAdminEvents() {
+            if (!currentUserIsAdmin) return;
+            adminEventsList.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "events"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    adminEventsList.innerHTML = "<p style='font-size: 13px; color: #666;'>登録されているイベントはありません。</p>";
+                    return;
+                }
+
+                let html = `<table class="admin-table"><tr><th>タイトル</th><th>日時</th><th>詳細</th><th>操作</th></tr>`;
+                querySnapshot.forEach((docSnap) => {
+                    const docId = docSnap.id;
+                    const data = docSnap.data();
+                    html += `<tr>
+                        <td><strong>${escapeHtml(data.title)}</strong></td>
+                        <td>${escapeHtml(data.date)}</td>
+                        <td>${escapeHtml(data.description)}</td>
+                        <td><button class="delete-btn" style="padding: 4px 8px; font-size: 11px;" onclick="deleteEvent('${docId}')">削除</button></td>
+                    </tr>`;
+                });
+                html += `</table>`;
+                adminEventsList.innerHTML = html;
+            } catch (e) {
+                console.error("管理者イベント読み込みエラー: ", e);
+                adminEventsList.innerHTML = "<p>読み込み失敗</p>";
+            }
+        }
+
+        // ================= メンバーリスト（「チームメンバーリスト」へ名称統一） =================
+        addMemberBtn.addEventListener('click', async () => {
+            if (!currentUserIsAdmin) return;
+            const name = memberNameInput.value.trim();
+            const role = memberRoleInput.value.trim();
+            const note = memberNoteInput.value.trim();
+
+            if (!name) {
+                alert("メンバー名を入力してください。");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "members"), {
+                    name: name,
+                    role: role || "メンバー",
+                    note: note || "",
+                    createdAt: new Date()
+                });
+                alert("メンバーを追加しました！");
+                memberNameInput.value = "";
+                memberRoleInput.value = "";
+                memberNoteInput.value = "";
+                loadMembers();
+                loadAdminMembers();
+            } catch (e) {
+                alert("メンバー追加エラー: " + e.message);
+            }
+        });
+
+        window.deleteMember = async function(docId) {
+            if (!currentUserIsAdmin) return;
+            if (confirm("このメンバー情報を削除しますか？")) {
+                try {
+                    await deleteDoc(doc(db, "members", docId));
+                    alert("メンバー情報を削除しました。");
+                    loadMembers();
+                    loadAdminMembers();
+                } catch (e) {
+                    alert("削除エラー: " + e.message);
+                }
+            }
+        };
+
+        async function loadMembers() {
+            membersListContainer.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "members"), orderBy("createdAt", "asc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    membersListContainer.innerHTML = "<p>チームメンバーリストの情報はまだ登録されていません。</p>";
+                    return;
+                }
+
+                let html = `<div class="member-grid">`;
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    html += `
+                        <div class="member-card">
+                            <h3 style="margin: 0 0 5px 0; color: #2e7d32;">👤 ${escapeHtml(data.name)}</h3>
+                            <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #ff9800;">【${escapeHtml(data.role)}】</p>
+                            <p style="margin: 0; font-size: 14px; color: #555; white-space: pre-wrap;">${escapeHtml(data.note)}</p>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                membersListContainer.innerHTML = html;
+            } catch (e) {
+                console.error("メンバーリスト読み込みエラー: ", e);
+                membersListContainer.innerHTML = "<p>チームメンバーリストの読み込みに失敗しました。</p>";
+            }
+        }
+
+        async function loadAdminMembers() {
+            if (!currentUserIsAdmin) return;
+            adminMembersList.innerHTML = "読み込み中...";
+            try {
+                const q = query(collection(db, "members"), orderBy("createdAt", "asc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    adminMembersList.innerHTML = "<p style='font-size: 13px; color: #666;'>登録されているメンバーはいません。</p>";
+                    return;
+                }
+
+                let html = `<table class="admin-table"><tr><th>名前 (ID)</th><th>役割</th><th>一言メモ</th><th>操作</th></tr>`;
+                querySnapshot.forEach((docSnap) => {
+                    const docId = docSnap.id;
+                    const data = docSnap.data();
+                    html += `<tr>
+                        <td><strong>${escapeHtml(data.name)}</strong></td>
+                        <td>${escapeHtml(data.role)}</td>
+                        <td>${escapeHtml(data.note)}</td>
+                        <td><button class="delete-btn" style="padding: 4px 8px; font-size: 11px;" onclick="deleteMember('${docId}')">削除</button></td>
+                    </tr>`;
+                });
+                html += `</table>`;
+                adminMembersList.innerHTML = html;
+            } catch (e) {
+                console.error("管理者メンバー読み込みエラー: ", e);
+                adminMembersList.innerHTML = "<p>読み込み失敗</p>";
+            }
+        }
+
+        // ================= FAQ追加・読み込み・削除 =================
         addFaqBtn.addEventListener('click', async () => {
             if (!currentUserIsAdmin) return;
             const question = faqQInput.value.trim();
@@ -708,7 +966,7 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    adminFaqList.innerHTML = "<p style='font-size: 13px; color: #666;'>登録されているFAQはありません。上部のフォームから追加してください。</p>";
+                    adminFaqList.innerHTML = "<p style='font-size: 13px; color: #666;'>登録されているFAQはありません。</p>";
                     return;
                 }
 
@@ -891,21 +1149,17 @@
         }
 
         async function loadPosts() {
-            homePostsContainer.innerHTML = "読み込み中...";
             newsPostsContainer.innerHTML = "読み込み中...";
             try {
                 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
-                    homePostsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
                     newsPostsContainer.innerHTML = "<p>お知らせはまだありません。</p>";
                     return;
                 }
 
                 let newsHtml = "";
-                let homeHtml = "";
-                let count = 0;
                 const currentUserEmail = auth.currentUser ? auth.currentUser.email : "";
 
                 querySnapshot.forEach((docSnap) => {
@@ -921,7 +1175,7 @@
                         deleteButtonHtml = `<button class="delete-btn" onclick="deletePost('${docId}')">削除</button>`;
                     }
 
-                    const itemHtml = `
+                    newsHtml += `
                         <div class="post-item">
                             <h4 style="margin: 0 0 8px 0; font-size: 16px;">${escapeHtml(data.title)}</h4>
                             <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${parseLinks(data.content)}</p>
@@ -932,19 +1186,11 @@
                             </div>
                         </div>
                     `;
-
-                    newsHtml += itemHtml;
-                    if (count < 3) {
-                        homeHtml += itemHtml;
-                        count++;
-                    }
                 });
 
                 newsPostsContainer.innerHTML = newsHtml;
-                homePostsContainer.innerHTML = homeHtml;
             } catch (e) {
                 console.error("お知らせ読み込みエラー: ", e);
-                homePostsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
                 newsPostsContainer.innerHTML = "<p>お知らせの読み込みに失敗しました。</p>";
             }
         }
@@ -999,6 +1245,8 @@
                 }
 
                 loadPosts();
+                loadEvents();
+                loadMembers();
                 loadSettings();
                 loadFaqs();
                 startVpnWatchdog();

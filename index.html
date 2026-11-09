@@ -64,6 +64,19 @@
         .like-btn { background: #e0e0e0; color: #333; padding: 6px 14px; font-size: 13px; border-radius: 20px; margin-top: 8px; border: none; cursor: pointer; font-weight: bold; }
         .like-btn.liked { background: #ff4081; color: white; }
 
+        /* Newバッジのスタイル */
+        .new-badge {
+            background-color: #ff3b30;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
         /* ルール＆FAQページのスタイル */
         .page-content { text-align: left; line-height: 1.8; color: #333; font-size: 15px; }
         .content-section { background: #fff; border: 1px solid #e0e0e0; border-left: 4px solid #ff9800; padding: 20px; margin-bottom: 25px; border-radius: 6px; }
@@ -1161,6 +1174,8 @@
 
                 let newsHtml = "";
                 const currentUserEmail = auth.currentUser ? auth.currentUser.email : "";
+                const now = new Date();
+                const fiveDaysInMs = 5 * 24 * 60 * 60 * 1000; // 5日間のミリ秒表現
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
@@ -1170,6 +1185,16 @@
                     const likeBtnClass = hasLiked ? "like-btn liked" : "like-btn";
                     const likeBtnText = hasLiked ? `❤️ いいね済み (${likes.length})` : `🤍 いいね (${likes.length})`;
 
+                    // 5日以内かの判定（Newマーク表示用）
+                    let isNew = false;
+                    if (data.createdAt) {
+                        const postTime = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+                        if (now - postTime <= fiveDaysInMs) {
+                            isNew = true;
+                        }
+                    }
+                    const newBadgeHtml = isNew ? `<span class="new-badge">New</span>` : "";
+
                     let deleteButtonHtml = "";
                     if (currentUserIsAdmin) {
                         deleteButtonHtml = `<button class="delete-btn" onclick="deletePost('${docId}')">削除</button>`;
@@ -1177,7 +1202,7 @@
 
                     newsHtml += `
                         <div class="post-item">
-                            <h4 style="margin: 0 0 8px 0; font-size: 16px;">${escapeHtml(data.title)}</h4>
+                            <h4 style="margin: 0 0 8px 0; font-size: 16px;">${escapeHtml(data.title)}${newBadgeHtml}</h4>
                             <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${parseLinks(data.content)}</p>
                             <small style="color: gray; display: inline-block; margin-top: 5px;">投稿者: ${escapeHtml(data.author || '管理者')} / ${data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString() : ''}</small>
                             <div>
